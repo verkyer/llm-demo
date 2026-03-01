@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEO | 个人主页</title>
+    <style>
+        /* --- 全局变量与重置 --- */
+        :root {
+            --bg-color: #0a0a0a;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --accent-color: #00f2ea; /* 霓虹青 */
+            --accent-secondary: #ff0055; /* 霓虹红 */
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --font-main: 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; /* 隐藏默认光标 */ }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* --- 自定义光标 --- */
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--accent-color);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s;
+            mix-blend-mode: difference;
+        }
+        .cursor-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* --- 导航栏 --- */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        .logo { font-size: 1.5rem; font-weight: 900; letter-spacing: 2px; }
+        .nav-links a {
+            color: var(--text-main);
+            text-decoration: none;
+            margin-left: 2rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-color);
+            transition: width 0.3s;
+        }
+        .nav-links a:hover::after { width: 100%; }
+
+        /* --- Hero Section --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        /* 背景动图 */
+        .hero-bg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop') no-repeat center center/cover;
+            filter: brightness(0.4) contrast(1.2);
+            z-index: -1;
+            transform: scale(1.1);
+            transition: transform 0.5s ease-out; /* 简单的视差 */
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 1;
+        }
+        
+        /* 故障文字特效 */
+        .glitch-title {
+            font-size: 6rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            position: relative;
+            color: var(--text-main);
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+        .glitch-title::before, .glitch-title::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color); /* 为了遮挡 */
+        }
+        .glitch-title::before {
+            left: 2px;
+            text-shadow: -2px 0 var(--accent-secondary);
+            clip: rect(24px, 550px, 90px, 0);
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+        .glitch-title::after {
+            left: -2px;
+            text-shadow: -2px 0 var(--accent-color);
+            clip: rect(85px, 550px, 140px, 0);
+            animation: glitch-anim 2.5s infinite linear alternate-reverse;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            letter-spacing: 5px;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+        }
+        
+        .btn-cta {
+            padding: 1rem 2.5rem;
+            background: transparent;
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            font-weight: bold;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        .btn-cta:hover {
+            background: var(--accent-color);
+            color: #000;
+            box-shadow: 0 0 20px var(--accent-color);
+        }
+
+        /* --- 通用 Section --- */
+        section {
+            padding: 100px 10%;
+            position: relative;
+        }
+        .section-title {
+            font-size: 3rem;
+            margin-bottom: 3rem;
+            position: relative;
+            display: inline-block;
+        }
+        .section-title::before {
+            content: '';
+            position: absolute;
+            bottom: 10px;
+            left: -20px;
+            width: 10px;
+            height: 50px;
+            background: var(--accent-secondary);
+        }
+
+        /* --- 作品展示 (网格布局) --- */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.4s, border-color 0.4s;
+            height: 400px;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-color);
+        }
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        .card:hover .card-img { transform: scale(1.1); }
+        .card-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(to top, #000, transparent);
+            transform: translateY(100px);
+            transition: transform 0.4s;
+        }
+        .card:hover .card-content { transform: translateY(0); }
+        .card-title { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .card-tag { color: var(--accent-color); font-size: 0.8rem; text-transform: uppercase; }
+
+        /* --- 技能条 --- */
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+        .skill-box {
+            flex: 1 1 300px;
+            background: linear-gradient(45deg, #111, #222);
+            padding: 2rem;
+            border-left: 3px solid var(--accent-color);
+        }
+        .skill-name { font-size: 1.2rem; margin-bottom: 1rem; display: flex; justify-content: space-between; }
+        .progress-bar {
+            height: 5px;
+            background: #333;
+            width: 100%;
+            position: relative;
+        }
+        .progress-fill {
+            position: absolute;
+            top: 0; left: 0;
+            height: 100%;
+            background: var(--accent-color);
+            width: 0;
+            transition: width 1.5s ease-in-out;
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+
+        /* --- 联系方式 --- */
+        .contact {
+            text-align: center;
+            background: url('https://images.unsplash.com/photo-1515630278258-407f66498911?q=80&w=1998&auto=format&fit=crop') center/cover fixed;
+        }
+        .overlay {
+            background: rgba(10, 10, 10, 0.8);
+            padding: 100px 10%;
+        }
+        .social-links {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+        .social-links a {
+            color: #fff;
+            font-size: 1.5rem;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .social-links a:hover { color: var(--accent-secondary); }
+
+        /* --- 动画关键帧 --- */
+        @keyframes glitch-anim {
+            0% { clip: rect(10px, 9999px, 31px, 0); }
+            20% { clip: rect(60px, 9999px, 80px, 0); }
+            40% { clip: rect(20px, 9999px, 60px, 0); }
+            60% { clip: rect(80px, 9999px, 5px, 0); }
+            80% { clip: rect(40px, 9999px, 20px, 0); }
+            100% { clip: rect(70px, 9999px, 90px, 0); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(80px, 9999px, 10px, 0); }
+            20% { clip: rect(10px, 9999px, 90px, 0); }
+            40% { clip: rect(50px, 9999px, 20px, 0); }
+            60% { clip: rect(20px, 9999px, 60px, 0); }
+            80% { clip: rect(90px, 9999px, 30px, 0); }
+            100% { clip: rect(30px, 9999px, 10px, 0); }
+        }
+
+        /* --- 响应式 --- */
+        @media (max-width: 768px) {
+            .glitch-title { font-size: 3.5rem; }
+            .hero-subtitle { font-size: 1rem; }
+            .nav-links { display: none; } /* 简化处理，移动端隐藏菜单 */
+        }
+        
+        /* 工具类：滚动动画触发 */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease-out;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 自定义光标 -->
+    <div class="cursor"></div>
+    <div class="cursor-dot"></div>
+
+    <nav>
+        <div class="logo">NEO<span style="color:var(--accent-color)">.</span></div>
+        <div class="nav-links">
+            <a href="#home">主页</a>
+            <a href="#work">作品</a>
+            <a href="#skills">技能</a>
+            <a href="#contact">联系</a>
+        </div>
+    </nav>
+
+    <header id="home" class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <h1 class="glitch-title" data-text="DEV_MAKER">DEV_MAKER</h1>
+            <p class="hero-subtitle">创造 · 设计 · 极客精神</p>
+            <a href="#work" class="btn-cta">探索我的世界</a>
+        </div>
+    </header>
+
+    <section id="work">
+        <h2 class="section-title reveal">精选案例</h2>
+        <div class="gallery">
+            <!-- 作品 1 -->
+            <div class="card reveal">
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop" alt="Project 1" class="card-img">
+                <div class="card-content">
+                    <div class="card-tag">UI/UX Design</div>
+                    <h3 class="card-title">赛博城市概念</h3>
+                </div>
+            </div>
+            <!-- 作品 2 -->
+            <div class="card reveal">
+                <img src="https://images.unsplash.com/photo-1555680202-c86f0e12f086?q=80&w=2070&auto=format&fit=crop" alt="Project 2" class="card-img">
+                <div class="card-content">
+                    <div class="card-tag">Development</div>
+                    <h3 class="card-title">未来仪表盘</h3>
+                </div>
+            </div>
+            <!-- 作品 3 -->
+            <div class="card reveal">
+                <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop" alt="Project 3" class="card-img">
+                <div class="card-content">
+                    <div class="card-tag">Branding</div>
+                    <h3 class="card-title">虚拟 ID 系统</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills">
+        <h2 class="section-title reveal">核心能力</h2>
+        <div class="skills-container">
+            <div class="skill-box reveal">
+                <div class="skill-name">Frontend Dev <span>95%</span></div>
+                <div class="progress-bar"><div class="progress-fill" data-width="95%"></div></div>
+            </div>
+            <div class="skill-box reveal">
+                <div class="skill-name">UI/UX Design <span>85%</span></div>
+                <div class="progress-bar"><div class="progress-fill" data-width="85%"></div></div>
+            </div>
+            <div class="skill-box reveal">
+                <div class="skill-name">3D Motion <span>70%</span></div>
+                <div class="progress-bar"><div class="progress-fill" data-width="70%"></div></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="contact">
+        <div class="overlay">
+            <h2 class="section-title reveal">准备开始了吗？</h2>
+            <p class="reveal" style="max-width: 600px; margin: 0 auto 2rem auto; color: #ccc;">
+                如果你有一个酷炫的想法，或者只是想聊聊技术，欢迎随时联系我。让我们一起构建未来。
+            </p>
+            <a href="mailto:hello@example.com" class="btn-cta reveal">发送邮件</a>
+            
+            <div class="social-links reveal">
+                <a href="#">GitHub</a>
+                <a href="#">Dribbble</a>
+                <a href="#">Twitter</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // 1. 自定义光标逻辑
+        const cursor = document.querySelector('.cursor');
+        const cursorDot = document.querySelector('.cursor-dot');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            cursorDot.style.left = e.clientX + 'px';
+            cursorDot.style.top = e.clientY + 'px';
+        });
+
+        // 链接悬停变大效果
+        document.querySelectorAll('a, button').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                cursor.style.transform = 'scale(2)';
+                cursor.style.borderColor = '#ff0055';
+            });
+            item.addEventListener('mouseleave', () => {
+                cursor.style.transform = 'scale(1)';
+                cursor.style.borderColor = '#00f2ea';
+            });
+        });
+
+        // 2. 滚动视差效果 (Parallax)
+        window.addEventListener('scroll', () => {
+            const heroBg = document.querySelector('.hero-bg');
+            let scrollPosition = window.pageYOffset;
+            heroBg.style.transform = 'scale(1.1) translateY(' + scrollPosition * 0.5 + 'px)';
+        });
+
+        // 3. 滚动触发动画 (Fade In + Progress Bars)
+        const revealElements = document.querySelectorAll('.reveal');
+        const progressBars = document.querySelectorAll('.progress-fill');
+
+        function checkScroll() {
+            const triggerBottom = window.innerHeight / 5 * 4;
+
+            // 元素入场动画
+            revealElements.forEach(box => {
+                const boxTop = box.getBoundingClientRect().top;
+                if(boxTop < triggerBottom) {
+                    box.classList.add('active');
+                }
+            });
+
+            // 进度条动画 (只有当 section 出现时才运行)
+            const skillsSection = document.getElementById('skills');
+            if(window.scrollY + window.innerHeight > skillsSection.offsetTop) {
+                progressBars.forEach(bar => {
+                    bar.style.width = bar.getAttribute('data-width');
+                });
+            }
+        }
+
+        window.addEventListener('scroll', checkScroll);
+        // 初始化检查一次
+        checkScroll();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alex Chen | 赛博全栈开发者</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Three.js for Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            black: '#050505',
+                            dark: '#0a0a0f',
+                            gray: '#1a1a24',
+                            neonBlue: '#00f3ff',
+                            neonPink: '#ff00ff',
+                            neonPurple: '#bc13fe'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Orbitron', 'sans-serif'],
+                        body: ['Rajdhani', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'grid-pattern': "linear-gradient(to right, #1f2937 1px, transparent 1px), linear-gradient(to bottom, #1f2937 1px, transparent 1px)",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            overflow-x: hidden;
+            cursor: none; /* Custom cursor */
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #00f3ff;
+            border-radius: 4px;
+        }
+
+        /* Glitch Effect Classes */
+        .glitch-wrapper {
+            position: relative;
+        }
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #050505;
+        }
+        .glitch::before {
+            left: 2px;
+            text-shadow: -1px 0 #ff00ff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        .glitch::after {
+            left: -2px;
+            text-shadow: -1px 0 #00f3ff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(30px, 9999px, 10px, 0); }
+            20% { clip: rect(80px, 9999px, 90px, 0); }
+            40% { clip: rect(10px, 9999px, 50px, 0); }
+            60% { clip: rect(60px, 9999px, 20px, 0); }
+            80% { clip: rect(40px, 9999px, 70px, 0); }
+            100% { clip: rect(20px, 9999px, 60px, 0); }
+        }
+        @keyframes glitch-anim2 {
+            0% { clip: rect(10px, 9999px, 80px, 0); }
+            20% { clip: rect(50px, 9999px, 20px, 0); }
+            40% { clip: rect(90px, 9999px, 10px, 0); }
+            60% { clip: rect(20px, 9999px, 60px, 0); }
+            80% { clip: rect(70px, 9999px, 30px, 0); }
+            100% { clip: rect(60px, 9999px, 40px, 0); }
+        }
+
+        /* Neon Glow Utilities */
+        .neon-border-blue {
+            box-shadow: 0 0 5px #00f3ff, 0 0 10px #00f3ff inset;
+            border: 1px solid #00f3ff;
+        }
+        .neon-text-pink {
+            text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
+        }
+        
+        /* Custom Cursor */
+        #cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00f3ff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+            mix-blend-mode: difference;
+        }
+        #cursor.hovered {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(0, 243, 255, 0.2);
+            border-color: #ff00ff;
+        }
+
+        /* Card Hover Effects */
+        .project-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .project-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+        }
+
+        /* Loader */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .loader-bar {
+            width: 200px;
+            height: 4px;
+            background: #333;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .loader-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: #00f3ff;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body class="font-body selection:bg-cyber-neonPink selection:text-white">
+
+    <!-- Custom Cursor -->
+    <div id="cursor"></div>
+
+    <!-- Preloader -->
+    <div id="loader">
+        <h1 class="text-4xl font-display text-cyber-neonBlue tracking-widest animate-pulse">SYSTEM BOOT</h1>
+        <div class="loader-bar">
+            <div class="loader-progress" id="progress-bar"></div>
+        </div>
+        <div class="mt-2 text-xs text-gray-500 font-mono" id="loading-text">INITIALIZING CORE MODULES...</div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 top-0 left-0 px-6 py-4 backdrop-blur-md bg-cyber-black/70 border-b border-white/10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="#" class="text-2xl font-display font-bold text-white tracking-tighter hover-trigger" data-cursor="hover">
+                ALEX<span class="text-cyber-neonBlue">.DEV</span>
+            </a>
+            
+            <div class="hidden md:flex space-x-8">
+                <a href="#about" class="text-gray-300 hover:text-cyber-neonBlue transition-colors duration-300 font-medium tracking-wide hover-trigger" data-cursor="hover">01. ABOUT</a>
+                <a href="#skills" class="text-gray-300 hover:text-cyber-neonBlue transition-colors duration-300 font-medium tracking-wide hover-trigger" data-cursor="hover">02. SKILLS</a>
+                <a href="#projects" class="text-gray-300 hover:text-cyber-neonBlue transition-colors duration-300 font-medium tracking-wide hover-trigger" data-cursor="hover">03. PROJECTS</a>
+                <a href="#contact" class="px-6 py-2 border border-cyber-neonBlue text-cyber-neonBlue hover:bg-cyber-neonBlue hover:text-black transition-all duration-300 font-bold rounded-sm hover-trigger" data-cursor="hover">CONNECT</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Three.js Canvas -->
+    <header class="relative h-screen w-full flex items-center justify-center overflow-hidden">
+        <!-- Three.js Container -->
+        <div id="canvas-container" class="absolute inset-0 z-0"></div>
+        
+        <!-- Overlay Gradient -->
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-cyber-black/50 to-cyber-black z-10 pointer-events-none"></div>
+
+        <!-- Content -->
+        <div class="relative z-20 text-center px-4 max-w-5xl mx-auto">
+            <p class="text-cyber-neonBlue font-mono mb-4 opacity-0 translate-y-10 animate-in">HELLO WORLD, I AM</p>
+            
+            <div class="glitch-wrapper mb-6">
+                <h1 class="text-6xl md:text-8xl lg:text-9xl font-display font-black text-white tracking-tighter glitch opacity-0 translate-y-10 animate-in" data-text="ALEX CHEN">
+                    ALEX CHEN
+                </h1>
+            </div>
+            
+            <h2 class="text-2xl md:text-4xl text-gray-400 font-light mb-8 opacity-0 translate-y-10 animate-in">
+                Building the <span class="text-cyber-neonPink font-bold neon-text-pink">Future</span> of the Web.
+            </h2>
+            
+            <div class="flex justify-center gap-4 opacity-0 translate-y-10 animate-in">
+                <a href="#projects" class="group relative px-8 py-3 bg-transparent overflow-hidden rounded-none hover-trigger" data-cursor="hover">
+                    <span class="absolute inset-0 w-full h-full bg-cyber-neonBlue/20 group-hover:bg-cyber-neonBlue transition-all duration-300 skew-x-12"></span>
+                    <span class="relative text-cyber-neonBlue group-hover:text-black font-bold tracking-wider uppercase">View Work</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20 animate-bounce">
+            <i class="fas fa-chevron-down text-cyber-neonBlue text-2xl"></i>
+        </div>
+    </header>
+
+    <!-- About Section -->
+    <section id="about" class="py-24 relative bg-cyber-dark">
+        <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyber-neonBlue to-transparent opacity-50"></div>
+        
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
+            <div class="order-2 md:order-1 reveal-on-scroll">
+                <h2 class="text-4xl md:text-5xl font-display font-bold mb-6">
+                    <span class="text-cyber-neonPink">></span> SYSTEM_OVERVIEW
+                </h2>
+                <p class="text-gray-400 text-lg leading-relaxed mb-6">
+                    I'm a creative technologist obsessed with bridging the gap between high-performance engineering and immersive design. With over 5 years of experience in the digital frontier, I don't just write code—I architect experiences.
+                </p>
+                <p class="text-gray-400 text-lg leading-relaxed mb-8">
+                    My stack is modern, my designs are futuristic, and my goal is simple: make the web feel like magic.
+                </p>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="border-l-2 border-cyber-neonBlue pl-4">
+                        <h4 class="text-white font-bold text-xl">50+</h4>
+                        <p class="text-gray-500 text-sm">Projects Launched</p>
+                    </div>
+                    <div class="border-l-2 border-cyber-neonPink pl-4">
+                        <h4 class="text-white font-bold text-xl">100%</h4>
+                        <p class="text-gray-500 text-sm">Commitment</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="order-1 md:order-2 relative group reveal-on-scroll">
+                <div class="absolute -inset-1 bg-gradient-to-r from-cyber-neonBlue to-cyber-neonPink rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+                <div class="relative aspect-square rounded-lg overflow-hidden border border-white/10">
+                    <!-- Cyberpunk Portrait Placeholder -->
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Profile" class="object-cover w-full h-full filter grayscale contrast-125 group-hover:scale-110 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-cyber-neonBlue/20 mix-blend-overlay"></div>
+                    
+                    <!-- Decorative UI Elements -->
+                    <div class="absolute top-4 right-4 flex gap-2">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    </div>
+                    <div class="absolute bottom-0 left-0 w-full p-4 bg-black/80 backdrop-blur-sm border-t border-white/10">
+                        <div class="font-mono text-xs text-cyber-neonBlue">STATUS: ONLINE</div>
+                        <div class="font-mono text-xs text-gray-400">LOCATION: SHANGHAI, CN</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section (Tech Stack) -->
+    <section id="skills" class="py-24 bg-cyber-black relative overflow-hidden">
+        <!-- Background Grid -->
+        <div class="absolute inset-0 bg-grid-pattern bg-[length:40px_40px] opacity-10"></div>
+
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-16 reveal-on-scroll">
+                <h2 class="text-4xl md:text-5xl font-display font-bold mb-4">TECH_ARSENAL</h2>
+                <div class="h-1 w-24 bg-cyber-neonBlue mx-auto"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Frontend -->
+                <div class="bg-cyber-gray/50 p-8 rounded-xl border border-white/5 hover:border-cyber-neonBlue transition-colors duration-300 group reveal-on-scroll">
+                    <div class="text-cyber-neonBlue text-4xl mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-white">Frontend Core</h3>
+                    <ul class="space-y-3 text-gray-400">
+                        <li class="flex items-center"><i class="fab fa-react mr-3 text-cyan-400"></i> React / Next.js</li>
+                        <li class="flex items-center"><i class="fab fa-vuejs mr-3 text-green-400"></i> Vue.js / Nuxt</li>
+                        <li class="flex items-center"><i class="fab fa-js mr-3 text-yellow-400"></i> TypeScript</li>
+                        <li class="flex items-center"><i class="fas fa-wind mr-3 text-cyan-300"></i> Tailwind CSS</li>
+                        <li class="flex items-center"><i class="fas fa-cube mr-3 text-white"></i> Three.js / WebGL</li>
+                    </ul>
+                </div>
+
+                <!-- Backend -->
+                <div class="bg-cyber-gray/50 p-8 rounded-xl border border-white/5 hover:border-cyber-neonPink transition-colors duration-300 group reveal-on-scroll" style="transition-delay: 100ms;">
+                    <div class="text-cyber-neonPink text-4xl mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-white">Backend & Data</h3>
+                    <ul class="space-y-3 text-gray-400">
+                        <li class="flex items-center"><i class="fab fa-node mr-3 text-green-500"></i> Node.js / Express</li>
+                        <li class="flex items-center"><i class="fas fa-database mr-3 text-blue-500"></i> PostgreSQL / MongoDB</li>
+                        <li class="flex items-center"><i class="fas fa-fire mr-3 text-orange-500"></i> Firebase</li>
+                        <li class="flex items-center"><i class="fab fa-python mr-3 text-yellow-300"></i> Python / Django</li>
+                        <li class="flex items-center"><i class="fas fa-network-wired mr-3 text-purple-400"></i> GraphQL</li>
+                    </ul>
+                </div>
+
+                <!-- Tools -->
+                <div class="bg-cyber-gray/50 p-8 rounded-xl border border-white/5 hover:border-purple-500 transition-colors duration-300 group reveal-on-scroll" style="transition-delay: 200ms;">
+                    <div class="text-purple-500 text-4xl mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-white">DevOps & Design</h3>
+                    <ul class="space-y-3 text-gray-400">
+                        <li class="flex items-center"><i class="fab fa-docker mr-3 text-blue-400"></i> Docker</li>
+                        <li class="flex items-center"><i class="fab fa-aws mr-3 text-orange-400"></i> AWS / Vercel</li>
+                        <li class="flex items-center"><i class="fab fa-git-alt mr-3 text-red-500"></i> Git / CI/CD</li>
+                        <li class="flex items-center"><i class="fab fa-figma mr-3 text-pink-400"></i> Figma</li>
+                        <li class="flex items-center"><i class="fas fa-terminal mr-3 text-gray-300"></i> Linux CLI</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="py-24 bg-cyber-dark">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 reveal-on-scroll">
+                <div>
+                    <h2 class="text-4xl md:text-5xl font-display font-bold mb-2">FEATURED_WORKS</h2>
+                    <p class="text-cyber-neonBlue font-mono">// Selected projects from the neural network</p>
+                </div>
+                <a href="#" class="hidden md:block text-gray-400 hover:text-white transition-colors mt-4 md:mt-0 hover-trigger" data-cursor="hover">View Github <i class="fas fa-arrow-right ml-2"></i></a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- Project 1 -->
+                <div class="project-card group relative rounded-xl overflow-hidden bg-cyber-gray border border-white/10 reveal-on-scroll">
+                    <div class="aspect-video overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Cyber Security Dashboard" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-cyber-black via-cyber-black/80 to-transparent opacity-90"></div>
+                    
+                    <div class="absolute bottom-0 left-0 w-full p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-2xl font-bold text-white group-hover:text-cyber-neonBlue transition-colors">NEBULA DASH</h3>
+                            <div class="flex gap-3">
+                                <a href="#" class="text-gray-400 hover:text-white hover-trigger" data-cursor="hover"><i class="fab fa-github text-xl"></i></a>
+                                <a href="#" class="text-gray-400 hover:text-white hover-trigger" data-cursor="hover"><i class="fas fa-external-link-alt text-xl"></i></a>
+                            </div>
+                        </div>
+                        <p class="text-gray-400 text-sm mb-4 line-clamp-2">A high-frequency trading visualization dashboard using WebGL and real-time data streams. Optimized for 4K displays.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-2 py-1 text-xs border border-cyber-neonBlue/30 text-cyber-neonBlue rounded bg-cyber-neonBlue/10">React</span>
+                            <span class="px-2 py-1 text-xs border border-cyber-neonBlue/30 text-cyber-neonBlue rounded bg-cyber-neonBlue/10">Three.js</span>
+                            <span class="px-2 py-1 text-xs border border-cyber-neonBlue/30 text-cyber-neonBlue rounded bg-cyber-neonBlue/10">WebSocket</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="project-card group relative rounded-xl overflow-hidden bg-cyber-gray border border-white/10 reveal-on-scroll" style="transition-delay: 100ms;">
+                    <div class="aspect-video overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1614726365723-49cfae988cc3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="AI Interface" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-cyber-black via-cyber-black/80 to-transparent opacity-90"></div>
+                    
+                    <div class="absolute bottom-0 left-0 w-full p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-2xl font-bold text-white group-hover:text-cyber-neonPink transition-colors">SYNTH MIND</h3>
+                            <div class="flex gap-3">
+                                <a href="#" class="text-gray-400 hover:text-white hover-trigger" data-cursor="hover"><i class="fab fa-github text-xl"></i></a>
+                                <a href="#" class="text-gray-400 hover:text-white hover-trigger" data-cursor="hover"><i class="fas fa-external-link-alt text-xl"></i></a>
+                            </div>
+                        </div>
+                        <p class="text-gray-400 text-sm mb-4 line-clamp-2">Generative AI art platform allowing users to create NFT collections using latent diffusion models directly in the browser.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-2 py-1 text-xs border border-cyber-neonPink/30 text-cyber-neonPink rounded bg-cyber-neonPink/10">Vue 3</span>
+                            <span class="px-2 py-1 text-xs border border-cyber-neonPink/30 text-cyber-neonPink rounded bg-cyber-neonPink/10">TensorFlow.js</span>
+                            <span class="px-2 py-1 text-xs border border-cyber-neonPink/30 text-cyber-neonPink rounded bg-cyber-neonPink/10">Solidity</span>
+                        </div>
+                    </div>
+                </div>
+
+                 <!-- Project 3 -->
+                 <div class="project-card group relative rounded-xl overflow-hidden bg-cyber-gray border border-white/10 reveal-on-scroll">
+                    <div class="aspect-video overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1515630278258-407f66498911?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Retro Game" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-cyber-black via-cyber-black/80 to-transparent opacity-90"></div>
+                    
+                    <div class="absolute bottom-0 left-0 w-full p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-2xl font-bold text-white group-hover:text-purple-500 transition-colors">NEON RACER</h3>
+                            <div class="flex gap-3">
+                                <a href="#" class="text-gray-400 hover:text-white hover-trigger" data-cursor="hover"><i class="fab fa-github text-xl"></i></a>
+                                <a href="#" class="text-gray-400 hover:text-white hover-trigger" data-cursor="hover"><i class="fas fa-external-link-alt text-xl"></i></a>
+                            </div>
+                        </div>
+                        <p class="text-gray-400 text-sm mb-4 line-clamp-2">Browser-based 3D racing game built with Babylon.js. Features ray-traced lighting effects and multiplayer support.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-2 py-1 text-xs border border-purple-500/30 text-purple-400 rounded bg-purple-500/10">Babylon.js</span>
+                            <span class="px-2 py-1 text-xs border border-purple-500/30 text-purple-400 rounded bg-purple-500/10">Socket.io</span>
+                            <span class="px-2 py-1 text-xs border border-purple-500/30 text-purple-400 rounded bg-purple-500/10">WebAudio API</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 4 -->
+                <div class="project-card group relative rounded-xl overflow-hidden bg-cyber-gray border border-white/10 reveal-on-scroll" style="transition-delay: 100ms;">
+                    <div class="aspect-video overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Code Matrix" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-cyber-black via-cyber-black/80 to-transparent opacity-90"></div>
+                    
+                    <div class="absolute bottom-0 left-0 w-full p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-2xl font-bold text-white group-hover:text-green-400 transition-colors">CRYPTO LEDGER</h3>
+                            <div class="flex gap-3">
+                                <a href="#" class="text-gray-400 hover:text-white hover-trigger" data-cursor="hover"><i class="fab fa-github text-xl"></i></a>
+                                <a href="#" class="text-gray-400 hover:text-white hover-trigger" data-cursor="hover"><i class="fas fa-external-link-alt text-xl"></i></a>
+                            </div>
+                        </div>
+                        <p class="text-gray-400 text-sm mb-4 line-clamp-2">Decentralized finance analytics tool tracking liquidity pools across multiple EVM chains in real-time.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-2 py-1 text-xs border border-green-400/30 text-green-400 rounded bg-green-400/10">Ethers.js</span>
+                            <span class="px-2 py-1 text-xs border border-green-400/30 text-green-400 rounded bg-green-400/10">Node.js</span>
+                            <span class="px-2 py-1 text-xs border border-green-400/30 text-green-400 rounded bg-green-400/10">Redis</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-24 bg-cyber-black relative">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <p class="text-cyber-neonBlue font-mono mb-4 reveal-on-scroll">04. WHAT'S NEXT?</p>
+            <h2 class="text-5xl md:text-7xl font-display font-bold mb-8 text-white reveal-on-scroll">GET IN TOUCH</h2>
+            <p class="text-gray-400 text-lg mb-12 max-w-2xl mx-auto reveal-on-scroll">
+                Although I'm not currently looking for any new opportunities, my inbox is always open. Whether you have a question or just want to say hi, I'll try my best to get back to you!
+            </p>
+            
+            <a href="mailto:alex.chen@cyber.dev" class="inline-block px-10 py-4 border-2 border-cyber-neonBlue text-cyber-neonBlue font-bold text-lg rounded hover:bg-cyber-neonBlue/10 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,243,255,0.4)] hover-trigger reveal-on-scroll" data-cursor="hover">
+                Say Hello
+            </a>
+
+            <div class="mt-20 flex justify-center space-x-8">
+                <a href="#" class="text-gray-400 hover:text-cyber-neonBlue text-2xl transition-colors hover-trigger" data-cursor="hover"><i class="fab fa-github"></i></a>
+                <a href="#" class="text-gray-400 hover:text-cyber-neonBlue text-2xl transition-colors hover-trigger" data-cursor="hover"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="text-gray-400 hover:text-cyber-neonBlue text-2xl transition-colors hover-trigger" data-cursor="hover"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="text-gray-400 hover:text-cyber-neonBlue text-2xl transition-colors hover-trigger" data-cursor="hover"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-8 bg-cyber-black text-center border-t border-white/5">
+        <p class="text-gray-600 font-mono text-sm">
+            Designed & Built by Alex Chen <br>
+            <span class="text-xs opacity-50">© 2023 CyberPortfolio Inc.</span>
+        </p>
+    </footer>
+
+    <script>
+        // --- Preloader Logic ---
+        window.addEventListener('load', () => {
+            const progressBar = document.getElementById('progress-bar');
+            const loaderText = document.getElementById('loading-text');
+            const loader = document.getElementById('loader');
+            
+            let width = 0;
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                    loaderText.innerText = "SYSTEM READY";
+                    setTimeout(() => {
+                        gsap.to(loader, {
+                            yPercent: -100,
+                            duration: 1,
+                            ease: "power4.inOut",
+                            onComplete: initAnimations
+                        });
+                    }, 500);
+                } else {
+                    width += Math.random() * 10;
+                    if(width > 100) width = 100;
+                    progressBar.style.width = width + '%';
+                    if(width > 30 && width < 60) loaderText.innerText = "LOADING ASSETS...";
+                    if(width > 60) loaderText.innerText = "ESTABLISHING CONNECTION...";
+                }
+            }, 100);
+        });
+
+        // --- Three.js Background Animation ---
+        function initThreeJS() {
+            const container = document.getElementById('canvas-container');
+            const scene = new THREE.Scene();
+            // Add subtle fog
+            scene.fog = new THREE.FogExp2(0x050505, 0.002);
+
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Create Particles
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = 1500;
+            const posArray = new Float32Array(particlesCount * 3);
+
+            for(let i = 0; i < particlesCount * 3; i++) {
+                // Spread particles wide
+                posArray[i] = (Math.random() - 0.5) * 50; 
+            }
+
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+            // Material
+            const material = new THREE.PointsMaterial({
+                size: 0.05,
+                color: 0x00f3ff,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending
+            });
+
+            const particlesMesh = new THREE.Points(particlesGeometry, material);
+            scene.add(particlesMesh);
+
+            camera.position.z = 5;
+
+            // Mouse interaction
+            let mouseX = 0;
+            let mouseY = 0;
+
+            document.addEventListener('mousemove', (event) => {
+                mouseX = event.clientX / window.innerWidth - 0.5;
+                mouseY = event.clientY / window.innerHeight - 0.5;
+            });
+
+            // Animation Loop
+            const clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+                const elapsedTime = clock.getElapsedTime();
+
+                // Rotate entire system slowly
+                particlesMesh.rotation.y = elapsedTime * 0.05;
+                
+                // Interactive parallax
+                particlesMesh.rotation.x += mouseY * 0.05;
+                particlesMesh.rotation.y += mouseX * 0.05;
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            // Resize handler
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        // --- GSAP Animations ---
+        function initAnimations() {
+            // Register ScrollTrigger
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Hero Text Stagger
+            gsap.to(".animate-in", {
+                y: 0,
+                opacity: 1,
+                duration: 1,
+                stagger: 0.2,
+                ease: "power3.out"
+            });
+
+            // Reveal on Scroll
+            const revealElements = document.querySelectorAll('.reveal-on-scroll');
+            revealElements.forEach(element => {
+                gsap.fromTo(element, 
+                    { y: 50, opacity: 0 },
+                    {
+                        y: 0,
+                        opacity: 1,
+                        duration: 1,
+                        ease: "power3.out",
+                        scrollTrigger: {
+                            trigger: element,
+                            start: "top 85%",
+                        }
+                    }
+                );
+            });
+        }
+
+        // --- Custom Cursor Logic ---
+        const cursor = document.getElementById('cursor');
+        const hoverTriggers = document.querySelectorAll('.hover-trigger');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        hoverTriggers.forEach(trigger => {
+            trigger.addEventListener('mouseenter', () => {
+                cursor.classList.add('hovered');
+            });
+            trigger.addEventListener('mouseleave', () => {
+                cursor.classList.remove('hovered');
+            });
+        });
+
+        // Initialize Three.js immediately but wait for load to animate in
+        initThreeJS();
+
+    </script>
+</body>
+</html>

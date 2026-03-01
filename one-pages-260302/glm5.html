@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALEX CHEN | Creative Developer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #050505; 
+            color: #fff;
+            overflow-x: hidden;
+        }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        
+        /* 粒子画布 */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        /* 光晕效果 */
+        .glow-purple {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: rgba(168, 85, 247, 0.15);
+            filter: blur(120px);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .glow-blue {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: rgba(59, 130, 246, 0.12);
+            filter: blur(100px);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .glow-fuchsia {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: rgba(217, 70, 239, 0.1);
+            filter: blur(90px);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        /* 文字渐变 */
+        .text-gradient {
+            background: linear-gradient(to right, #a855f7, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .text-gradient-gold {
+            background: linear-gradient(to right, #fef3c7, #fcd34d, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* 边框渐变 */
+        .border-gradient {
+            position: relative;
+            border-radius: 1rem;
+            background: #0a0a0a;
+        }
+        .border-gradient::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 1rem;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(59, 130, 246, 0.2), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+        
+        /* 技能条动画 */
+        .skill-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .skill-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #a855f7, #3b82f6);
+            border-radius: 3px;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .skill-bar-fill.animate {
+            transform: scaleX(1);
+        }
+        
+        /* 打字机光标 */
+        .cursor {
+            display: inline-block;
+            width: 3px;
+            height: 1em;
+            background: #a855f7;
+            margin-left: 4px;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        /* 滚动动画 */
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 卡片悬浮效果 */
+        .card-hover {
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(168, 85, 247, 0.25);
+        }
+        
+        /* 图片悬浮效果 */
+        .img-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        /* 旋转边框 */
+        .rotating-border {
+            position: relative;
+            overflow: hidden;
+        }
+        .rotating-border::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: conic-gradient(from 0deg, transparent, #a855f7, #3b82f6, transparent);
+            animation: rotate 4s linear infinite;
+        }
+        .rotating-border::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            background: #0a0a0a;
+            border-radius: inherit;
+        }
+        @keyframes rotate {
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 时间线 */
+        .timeline-line {
+            position: absolute;
+            left: 24px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #a855f7, #3b82f6, transparent);
+        }
+        
+        /* 按钮shine效果 */
+        .btn-shine {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-shine::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.7s;
+        }
+        .btn-shine:hover::before {
+            left: 150%;
+        }
+        
+        /* 导航动画 */
+        .nav-link {
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #a855f7, #3b82f6);
+            transition: width 0.3s;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        /* 数字计数器 */
+        .counter-item {
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .counter-item.is-visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body>
+    <!-- 粒子背景 -->
+    <canvas id="particles-canvas"></canvas>
+    
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-md border-b border-white/5">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="#" class="text-2xl font-semibold text-gradient">AC</a>
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#about" class="nav-link text-sm text-neutral-400 hover:text-white transition-colors">关于</a>
+                <a href="#skills" class="nav-link text-sm text-neutral-400 hover:text-white transition-colors">技能</a>
+                <a href="#works" class="nav-link text-sm text-neutral-400 hover:text-white transition-colors">作品</a>
+                <a href="#contact" class="nav-link text-sm text-neutral-400 hover:text-white transition-colors">联系</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="#" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
+                    <i data-lucide="github" class="w-4 h-4"></i>
+                </a>
+                <a href="#" class="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity btn-shine">
+                    简历下载
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero 区域 -->
+    <section class="min-h-screen flex items-center justify-center relative overflow-hidden pt-20">
+        <div class="glow-purple top-20 -left-40"></div>
+        <div class="glow-blue bottom-20 -right-40"></div>
+        
+        <div class="max-w-6xl mx-auto px-6 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <!-- 左侧文字 -->
+                <div class="text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full mb-6 reveal-on-scroll">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        <span class="text-sm text-neutral-400">Available for work</span>
+                    </div>
+                    
+                    <h1 class="text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tight mb-6 reveal-on-scroll" style="transition-delay: 0.1s">
+                        Hi, I'm<br>
+                        <span class="font-serif italic text-gradient">Alex Chen</span>
+                    </h1>
+                    
+                    <div class="text-2xl md:text-3xl text-neutral-400 mb-8 reveal-on-scroll" style="transition-delay: 0.2s">
+                        <span id="typed-text"></span><span class="cursor"></span>
+                    </div>
+                    
+                    <p class="text-lg text-neutral-500 font-light leading-relaxed mb-10 max-w-lg mx-auto lg:mx-0 reveal-on-scroll" style="transition-delay: 0.3s">
+                        全栈开发工程师 / 独立创作者 / 开源爱好者。
+                        热爱用代码创造美好事物，追求极致的用户体验。
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start reveal-on-scroll" style="transition-delay: 0.4s">
+                        <a href="#works" class="px-8 py-4 bg-white text-black rounded-xl font-semibold hover:bg-neutral-200 transition-colors btn-shine">
+                            查看作品
+                        </a>
+                        <a href="#contact" class="px-8 py-4 bg-white/5 border border-white/20 rounded-xl font-semibold hover:bg-white/10 transition-colors flex items-center justify-center gap-2">
+                            <i data-lucide="mail" class="w-5 h-5"></i>
+                            联系我
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 右侧图片 -->
+                <div class="relative hidden lg:block">
+                    <div class="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-3xl blur-3xl"></div>
+                    <div class="relative rotating-border rounded-3xl">
+                        <div class="relative z-10 p-2">
+                            <img src="https://picsum.photos/seed/developer-portrait/600/700" 
+                                 alt="Alex Chen" 
+                                 class="rounded-2xl w-full h-[500px] object-cover img-float">
+                        </div>
+                    </div>
+                    
+                    <!-- 浮动卡片 -->
+                    <div class="absolute -left-16 top-20 border-gradient p-4 backdrop-blur-xl card-hover" style="background: rgba(23,23,23,0.8);">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+                                <i data-lucide="code-2" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm font-medium">5+ Years</div>
+                                <div class="text-xs text-neutral-500">开发经验</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="absolute -right-8 bottom-32 border-gradient p-4 backdrop-blur-xl card-hover" style="background: rgba(23,23,23,0.8);">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
+                                <i data-lucide="trophy" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm font-medium">100+</div>
+                                <div class="text-xs text-neutral-500">完成项目</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 滚动提示 -->
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-neutral-500">
+            <span class="text-xs tracking-widest uppercase">Scroll</span>
+            <div class="w-6 h-10 border border-white/20 rounded-full flex justify-center pt-2">
+                <div class="w-1 h-2 bg-white rounded-full animate-bounce"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 统计数据 -->
+    <section class="py-20 relative">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div class="counter-item text-center p-6 border-gradient">
+                    <div class="text-5xl font-semibold text-gradient mb-2" data-count="5">0</div>
+                    <div class="text-sm text-neutral-400 uppercase tracking-wider">年经验</div>
+                </div>
+                <div class="counter-item text-center p-6 border-gradient" style="transition-delay: 0.1s">
+                    <div class="text-5xl font-semibold text-gradient-gold mb-2" data-count="100">0</div>
+                    <div class="text-sm text-neutral-400 uppercase tracking-wider">完成项目</div>
+                </div>
+                <div class="counter-item text-center p-6 border-gradient" style="transition-delay: 0.2s">
+                    <div class="text-5xl font-semibold text-gradient mb-2" data-count="50">0</div>
+                    <div class="text-sm text-neutral-400 uppercase tracking-wider">合作客户</div>
+                </div>
+                <div class="counter-item text-center p-6 border-gradient" style="transition-delay: 0.3s">
+                    <div class="text-5xl font-semibold text-gradient-gold mb-2" data-count="1000">0</div>
+                    <div class="text-sm text-neutral-400 uppercase tracking-wider">GitHub Stars</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于我 -->
+    <section id="about" class="py-24 relative">
+        <div class="glow-fuchsia top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+        
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="reveal-on-scroll">
+                    <div class="relative">
+                        <div class="absolute -inset-4 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-3xl blur-2xl"></div>
+                        <img src="https://picsum.photos/seed/workspace-modern/600/500" 
+                             alt="Workspace" 
+                             class="relative rounded-2xl w-full h-[400px] object-cover">
+                        
+                        <!-- 叠加小图 -->
+                        <div class="absolute -bottom-8 -right-8 w-48 h-48 rounded-xl overflow-hidden border-4 border-[#0a0a0a] shadow-2xl">
+                            <img src="https://picsum.photos/seed/coding-cat/200/200" 
+                                 alt="Coding" 
+                                 class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="reveal-on-scroll" style="transition-delay: 0.2s">
+                    <span class="text-sm text-purple-400 uppercase tracking-widest">About Me</span>
+                    <h2 class="text-4xl md:text-5xl font-semibold mt-4 mb-6">
+                        热爱编程的<br><span class="font-serif italic text-gradient">创意开发者</span>
+                    </h2>
+                    <p class="text-lg text-neutral-400 font-light leading-relaxed mb-6">
+                        我是一名拥有5年经验的全栈开发工程师，专注于Web应用开发和用户体验设计。
+                        我相信代码是一种艺术形式，每一行代码都应该被精心打磨。
+                    </p>
+                    <p class="text-lg text-neutral-400 font-light leading-relaxed mb-8">
+                        从前端到后端，从设计到部署，我享受产品开发的每一个环节。
+                        业余时间我喜欢探索新技术、贡献开源项目，以及分享我的知识给社区。
+                    </p>
+                    
+                    <div class="flex flex-wrap gap-3">
+                        <span class="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm">React</span>
+                        <span class="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm">Vue</span>
+                        <span class="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm">Node.js</span>
+                        <span class="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm">TypeScript</span>
+                        <span class="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm">Python</span>
+                        <span class="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm">Docker</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 技能展示 -->
+    <section id="skills" class="py-24 relative bg-gradient-to-b from-transparent via-purple-500/5 to-transparent">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-16 reveal-on-scroll">
+                <span class="text-sm text-purple-400 uppercase tracking-widest">My Skills</span>
+                <h2 class="text-4xl md:text-5xl font-semibold mt-4">
+                    专业<span class="font-serif italic text-gradient">技能</span>
+                </h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- 左侧技能条 -->
+                <div class="space-y-8 reveal-on-scroll">
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="font-medium">React / Vue.js</span>
+                            <span class="text-purple-400">95%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-bar-fill" style="--width: 95%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="font-medium">Node.js / Express</span>
+                            <span class="text-purple-400">90%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-bar-fill" style="--width: 90%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="font-medium">TypeScript</span>
+                            <span class="text-purple-400">88%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-bar-fill" style="--width: 88%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="font-medium">Python / Django</span>
+                            <span class="text-purple-400">85%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-bar-fill" style="--width: 85%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="font-medium">UI/UX Design</span>
+                            <span class="text-purple-400">80%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-bar-fill" style="--width: 80%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 右侧技能卡片 -->
+                <div class="grid grid-cols-2 gap-4 reveal-on-scroll" style="transition-delay: 0.2s">
+                    <div class="border-gradient p-6 card-hover group">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <i data-lucide="layout" class="w-7 h-7 text-purple-400"></i>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">前端开发</h3>
+                        <p class="text-sm text-neutral-500 font-light">响应式设计、性能优化、组件化开发</p>
+                    </div>
+                    <div class="border-gradient p-6 card-hover group">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-500/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <i data-lucide="server" class="w-7 h-7 text-blue-400"></i>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">后端开发</h3>
+                        <p class="text-sm text-neutral-500 font-light">API设计、数据库优化、微服务架构</p>
+                    </div>
+                    <div class="border-gradient p-6 card-hover group">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500/20 to-green-500/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <i data-lucide="database" class="w-7 h-7 text-green-400"></i>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">数据库</h3>
+                        <p class="text-sm text-neutral-500 font-light">MySQL、PostgreSQL、MongoDB、Redis</p>
+                    </div>
+                    <div class="border-gradient p-6 card-hover group">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500/20 to-orange-500/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <i data-lucide="cloud" class="w-7 h-7 text-orange-400"></i>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">云服务</h3>
+                        <p class="text-sm text-neutral-500 font-light">AWS、Docker、K8s、CI/CD</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 作品展示 -->
+    <section id="works" class="py-24 relative">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-16 reveal-on-scroll">
+                <span class="text-sm text-purple-400 uppercase tracking-widest">My Works</span>
+                <h2 class="text-4xl md:text-5xl font-semibold mt-4">
+                    精选<span class="font-serif italic text-gradient">作品</span>
+                </h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 作品1 -->
+                <div class="group reveal-on-scroll">
+                    <div class="border-gradient overflow-hidden card-hover">
+                        <div class="relative h-56 overflow-hidden">
+                            <img src="https://picsum.photos/seed/project-ecommerce/600/400" 
+                                 alt="E-commerce Platform" 
+                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <span class="px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full text-xs text-purple-300">React</span>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2">电商平台</h3>
+                            <p class="text-sm text-neutral-500 font-light mb-4">全栈电商解决方案，支持多商户、支付集成、实时库存管理</p>
+                            <a href="#" class="inline-flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors">
+                                查看详情 <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 作品2 -->
+                <div class="group reveal-on-scroll" style="transition-delay: 0.1s">
+                    <div class="border-gradient overflow-hidden card-hover">
+                        <div class="relative h-56 overflow-hidden">
+                            <img src="https://picsum.photos/seed/project-dashboard/600/400" 
+                                 alt="Analytics Dashboard" 
+                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <span class="px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-full text-xs text-blue-300">Vue.js</span>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2">数据仪表盘</h3>
+                            <p class="text-sm text-neutral-500 font-light mb-4">实时数据可视化平台，支持自定义图表和智能预警</p>
+                            <a href="#" class="inline-flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors">
+                                查看详情 <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 作品3 -->
+                <div class="group reveal-on-scroll" style="transition-delay: 0.2s">
+                    <div class="border-gradient overflow-hidden card-hover">
+                        <div class="relative h-56 overflow-hidden">
+                            <img src="https://picsum.photos/seed/project-social/600/400" 
+                                 alt="Social App" 
+                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <span class="px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full text-xs text-green-300">Node.js</span>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2">社交应用</h3>
+                            <p class="text-sm text-neutral-500 font-light mb-4">实时社交平台，支持即时通讯、动态发布和智能推荐</p>
+                            <a href="#" class="inline-flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors">
+                                查看详情 <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 作品4 -->
+                <div class="group reveal-on-scroll" style="transition-delay: 0.3s">
+                    <div class="border-gradient overflow-hidden card-hover">
+                        <div class="relative h-56 overflow-hidden">
+                            <img src="https://picsum.photos/seed/project-ai/600/400" 
+                                 alt="AI Tool" 
+                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <span class="px-3 py-1 bg-fuchsia-500/20 border border-fuchsia-500/30 rounded-full text-xs text-fuchsia-300">Python</span>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2">AI 写作助手</h3>
+                            <p class="text-sm text-neutral-500 font-light mb-4">基于GPT的智能写作工具，帮助用户提升创作效率</p>
+                            <a href="#" class="inline-flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors">
+                                查看详情 <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 作品5 -->
+                <div class="group reveal-on-scroll" style="transition-delay: 0.4s">
+                    <div class="border-gradient overflow-hidden card-hover">
+                        <div class="relative h-56 overflow-hidden">
+                            <img src="https://picsum.photos/seed/project-mobile/600/400" 
+                                 alt="Mobile App" 
+                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <span class="px-3 py-1 bg-cyan-500/20 border border-cyan-500/30 rounded-full text-xs text-cyan-300">React Native</span>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2">健身追踪App</h3>
+                            <p class="text-sm text-neutral-500 font-light mb-4">跨平台健身应用，支持运动记录、计划定制和数据分析</p>
+                            <a href="#" class="inline-flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors">
+                                查看详情 <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 作品6 -->
+                <div class="group reveal-on-scroll" style="transition-delay: 0.5s">
+                    <div class="border-gradient overflow-hidden card-hover">
+                        <div class="relative h-56 overflow-hidden">
+                            <img src="https://picsum.photos/seed/project-design/600/400" 
+                                 alt="Design System" 
+                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <span class="px-3 py-1 bg-amber-500/20 border border-amber-500/30 rounded-full text-xs text-amber-300">Figma</span>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2">设计系统</h3>
+                            <p class="text-sm text-neutral-500 font-light mb-4">完整的UI组件库和设计规范，提升团队协作效率</p>
+                            <a href="#" class="inline-flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors">
+                                查看详情 <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12 reveal-on-scroll">
+                <a href="#" class="inline-flex items-center gap-2 px-8 py-4 border border-white/20 rounded-xl hover:bg-white/5 transition-colors">
+                    查看更多项目 <i data-lucide="github" class="w-5 h-5"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 经历时间线 -->
+    <section class="py-24 relative bg-gradient-to-b from-transparent via-blue-500/5 to-transparent">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-16 reveal-on-scroll">
+                <span class="text-sm text-purple-400 uppercase tracking-widest">Experience</span>
+                <h2 class="text-4xl md:text-5xl font-semibold mt-4">
+                    工作<span class="font-serif italic text-gradient">经历</span>
+                </h2>
+            </div>
+            
+            <div class="relative">
+                <div class="timeline-line hidden md:block"></div>
+                
+                <div class="space-y-12 md:pl-16">
+                    <!-- 经历1 -->
+                    <div class="relative reveal-on-scroll">
+                        <div class="hidden md:block absolute left-0 top-2 w-12 h-12 -ml-16 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center border-4 border-[#0a0a0a]">
+                            <i data-lucide="briefcase" class="w-5 h-5"></i>
+                        </div>
+                        <div class="border-gradient p-6">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                                <h3 class="text-xl font-semibold">高级全栈工程师</h3>
+                                <span class="text-sm text-purple-400">2022 - 至今</span>
+                            </div>
+                            <p class="text-neutral-400 font-light mb-2">@ TechCorp Inc.</p>
+                            <p class="text-sm text-neutral-500 font-light">领导团队完成多个核心项目，优化系统性能提升40%，建立技术规范和代码审查流程。</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 经历2 -->
+                    <div class="relative reveal-on-scroll" style="transition-delay: 0.1s">
+                        <div class="hidden md:block absolute left-0 top-2 w-12 h-12 -ml-16 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center border-4 border-[#0a0a0a]">
+                            <i data-lucide="code" class="w-5 h-5"></i>
+                        </div>
+                        <div class="border-gradient p-6">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                                <h3 class="text-xl font-semibold">前端开发工程师</h3>
+                                <span class="text-sm text-blue-400">2020 - 2022</span>
+                            </div>
+                            <p class="text-neutral-400 font-light mb-2">@ StartupXYZ</p>
+                            <p class="text-sm text-neutral-500 font-light">从零搭建前端架构，实现组件库，推动团队技术栈升级，提升开发效率。</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 经历3 -->
+                    <div class="relative reveal-on-scroll" style="transition-delay: 0.2s">
+                        <div class="hidden md:block absolute left-0 top-2 w-12 h-12 -ml-16 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center border-4 border-[#0a0a0a]">
+                            <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+                        </div>
+                        <div class="border-gradient p-6">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                                <h3 class="text-xl font-semibold">计算机科学学士</h3>
+                                <span class="text-sm text-green-400">2016 - 2020</span>
+                            </div>
+                            <p class="text-neutral-400 font-light mb-2">@ 北京大学</p>
+                            <p class="text-sm text-neutral-500 font-light">专业排名前5%，获得国家奖学金，参与多项科研项目，发表学术论文2篇。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系区域 -->
+    <section id="contact" class="py-24 relative">
+        <div class="glow-purple top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2"></div>
+        <div class="glow-blue top-1/2 right-1/4 translate-x-1/2 -translate-y-1/2"></div>
+        
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <div class="reveal-on-scroll">
+                <span class="text-sm text-purple-400 uppercase tracking-widest">Get In Touch</span>
+                <h2 class="text-4xl md:text-6xl font-semibold mt-4 mb-6">
+                    让我们一起<span class="font-serif italic text-gradient">创造</span>
+                </h2>
+                <p class="text-lg text-neutral-400 font-light mb-12 max-w-2xl mx-auto">
+                    无论你有项目想法、合作意向，还是只是想打个招呼，都欢迎联系我！我会在24小时内回复。
+                </p>
+            </div>
+            
+            <div class="reveal-on-scroll" style="transition-delay: 0.2s">
+                <a href="mailto:hello@alexchen.dev" class="inline-flex items-center gap-3 text-2xl md:text-4xl font-semibold text-gradient hover:opacity-80 transition-opacity mb-12">
+                    <i data-lucide="mail" class="w-8 h-8"></i>
+                    hello@alexchen.dev
+                </a>
+            </div>
+            
+            <div class="flex justify-center gap-4 reveal-on-scroll" style="transition-delay: 0.3s">
+                <a href="#" class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-purple-500/50 transition-all group">
+                    <i data-lucide="github" class="w-6 h-6 group-hover:text-purple-400 transition-colors"></i>
+                </a>
+                <a href="#" class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-blue-500/50 transition-all group">
+                    <i data-lucide="linkedin" class="w-6 h-6 group-hover:text-blue-400 transition-colors"></i>
+                </a>
+                <a href="#" class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-pink-500/50 transition-all group">
+                    <i data-lucide="instagram" class="w-6 h-6 group-hover:text-pink-400 transition-colors"></i>
+                </a>
+                <a href="#" class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-cyan-500/50 transition-all group">
+                    <i data-lucide="twitter" class="w-6 h-6 group-hover:text-cyan-400 transition-colors"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="py-8 border-t border-white/5">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-neutral-500">
+                <div>© 2024 Alex Chen. All rights reserved.</div>
+                <div class="flex items-center gap-2">
+                    <span>Made with</span>
+                    <i data-lucide="heart" class="w-4 h-4 text-red-500 fill-red-500"></i>
+                    <span>and</span>
+                    <i data-lucide="coffee" class="w-4 h-4 text-amber-500"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 初始化 Lucide 图标
+        lucide.createIcons();
+
+        // Three.js 粒子背景
+        const canvas = document.getElementById('particles-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // 创建粒子
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 2000;
+        const posArray = new Float32Array(particlesCount * 3);
+        const colorsArray = new Float32Array(particlesCount * 3);
+
+        for (let i = 0; i < particlesCount * 3; i += 3) {
+            posArray[i] = (Math.random() - 0.5) * 10;
+            posArray[i + 1] = (Math.random() - 0.5) * 10;
+            posArray[i + 2] = (Math.random() - 0.5) * 10;
+            
+            // 紫色到蓝色渐变
+            colorsArray[i] = 0.5 + Math.random() * 0.3;     // R
+            colorsArray[i + 1] = 0.2 + Math.random() * 0.3;  // G
+            colorsArray[i + 2] = 0.8 + Math.random() * 0.2;  // B
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorsArray, 3));
+
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.008,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        camera.position.z = 3;
+
+        // 鼠标交互
+        let mouseX = 0;
+        let mouseY = 0;
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        // 动画循环
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            particlesMesh.rotation.y += 0.0005;
+            particlesMesh.rotation.x += 0.0002;
+            
+            particlesMesh.rotation.y += mouseX * 0.0003;
+            particlesMesh.rotation.x += mouseY * 0.0003;
+            
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // 窗口大小调整
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // 打字机效果
+        const typedText = document.getElementById('typed-text');
+        const words = ['全栈开发者', '创意设计师', '开源贡献者', '终身学习者'];
+        let wordIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+
+        function type() {
+            const currentWord = words[wordIndex];
+            
+            if (isDeleting) {
+                typedText.textContent = currentWord.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                typedText.textContent = currentWord.substring(0, charIndex + 1);
+                charIndex++;
+            }
+
+            let typeSpeed = isDeleting ? 100 : 200;
+
+            if (!isDeleting && charIndex === currentWord.length) {
+                typeSpeed = 2000;
+                isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                wordIndex = (wordIndex + 1) % words.length;
+                typeSpeed = 500;
+            }
+
+            setTimeout(type, typeSpeed);
+        }
+        setTimeout(type, 1000);
+
+        // 滚动动画
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    
+                    // 技能条动画
+                    if (entry.target.querySelector('.skill-bar-fill')) {
+                        entry.target.querySelectorAll('.skill-bar-fill').forEach(bar => {
+                            const width = bar.style.getPropertyValue('--width');
+                            setTimeout(() => {
+                                bar.style.transform = `scaleX(${parseInt(width) / 100})`;
+                            }, 200);
+                        });
+                    }
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal-on-scroll, .counter-item').forEach(el => {
+            observer.observe(el);
+        });
+
+        // 计数器动画
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    const countEl = entry.target.querySelector('[data-count]');
+                    if (countEl) {
+                        const target = parseInt(countEl.dataset.count);
+                        let current = 0;
+                        const increment = target / 50;
+                        const timer = setInterval(() => {
+                            current += increment;
+                            if (current >= target) {
+                                current = target;
+                                clearInterval(timer);
+                            }
+                            countEl.textContent = Math.floor(current) + (target >= 100 ? '+' : target >= 10 ? '+' : '+');
+                        }, 40);
+                    }
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.counter-item').forEach(el => {
+            counterObserver.observe(el);
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
