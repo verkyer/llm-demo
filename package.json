@@ -1,0 +1,15 @@
+{
+  "name": "html-project-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HTML项目演示：索引 html 目录并提供静态访问",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
+
