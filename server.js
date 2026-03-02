@@ -222,6 +222,7 @@ function renderHomePage() {
       .search-input {
         width: 100%;
         padding: 1rem 1.5rem 1rem 3rem;
+        padding-right: 3.25rem;
         font-size: 1rem;
         border: 1px solid transparent;
         border-radius: 1rem;
@@ -229,6 +230,8 @@ function renderHomePage() {
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         transition: all 0.2s ease;
         outline: none;
+        position: relative;
+        z-index: 1;
       }
 
       .search-input:focus {
@@ -249,6 +252,32 @@ function renderHomePage() {
         pointer-events: none;
         width: 1.25rem;
         height: 1.25rem;
+        z-index: 2;
+      }
+
+      .clear-btn {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 0.6rem;
+        border: 1px solid var(--border-color);
+        background: #fff;
+        color: var(--text-secondary);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 2;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+      }
+
+      .clear-btn:hover {
+        background: var(--hover-bg);
+        color: var(--text-primary);
+        border-color: #d1d5db;
       }
 
       .card {
@@ -406,6 +435,9 @@ function renderHomePage() {
         <div class="search-wrapper">
             <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             <input type="text" id="searchInput" class="search-input" placeholder="搜索项目..." autocomplete="off">
+            <button type="button" id="clearSearch" class="clear-btn" aria-label="清除搜索">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
         </div>
       </header>
 
@@ -419,12 +451,20 @@ function renderHomePage() {
 
     <script>
       const searchInput = document.getElementById('searchInput');
+      const clearSearch = document.getElementById('clearSearch');
       const treeItems = document.querySelectorAll('.tree-item');
       const noResults = document.getElementById('noResults');
+
+      const updateClearVisibility = () => {
+        const hasValue = searchInput.value.trim().length > 0;
+        clearSearch.style.display = hasValue ? 'flex' : 'none';
+      };
 
       searchInput.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase().trim();
         let hasVisible = false;
+
+        updateClearVisibility();
 
         treeItems.forEach(item => {
           const name = item.getAttribute('data-name').toLowerCase();
@@ -462,6 +502,14 @@ function renderHomePage() {
 
         noResults.style.display = hasVisible ? 'none' : 'block';
       });
+
+      clearSearch.addEventListener('click', () => {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+        searchInput.focus();
+      });
+
+      updateClearVisibility();
 
       document.addEventListener('click', (e) => {
         const header = e.target.closest('.branch-header');
