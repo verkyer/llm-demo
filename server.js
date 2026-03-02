@@ -420,6 +420,24 @@ function renderHomePage() {
         display: none;
       }
 
+      .footer {
+        margin-top: 6.5rem;
+        text-align: center;
+        color: rgba(107, 114, 128, 0.55);
+        font-size: 0.85rem;
+        padding-bottom: 2.5rem;
+      }
+
+      .footer a {
+        color: inherit;
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .footer a:hover {
+        text-decoration: underline;
+      }
+
       @keyframes slideDown {
         from { opacity: 0; transform: translateY(-5px); }
         to { opacity: 1; transform: translateY(0); }
@@ -447,6 +465,10 @@ function renderHomePage() {
         </div>
         <div id="noResults" class="no-results">没有找到相关项目</div>
       </main>
+
+      <footer class="footer">
+        By <a href="https://github.com/verkyer/llm-demo" target="_blank" rel="noopener noreferrer">llm-demo</a>. @<a href="https://www.xiaoge.org" target="_blank" rel="noopener noreferrer">XiaoGe</a>.
+      </footer>
     </div>
 
     <script>
