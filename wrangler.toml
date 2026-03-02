@@ -1,6 +1,6 @@
 name = "llm-demo"
 main = "src/worker.js"
-compatibility_date = "2026-03-02"
+compatibility_date = "2026-02-28"
 
 [assets]
 directory = "./html"
