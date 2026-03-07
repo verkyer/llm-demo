@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>快速记分板</title>
+    <style>
+        :root {
+            /* 默认浅色模式 (iOS风格) */
+            --bg-color: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --text-color: #000000;
+            --text-secondary: #8E8E93;
+            --border-color: #C6C6C8;
+            --primary-color: #007AFF;
+            --danger-color: #FF3B30;
+            --success-color: #34C759;
+            --input-bg: #F2F2F7;
+            --header-bg: rgba(249, 249, 249, 0.9);
+            --shadow-color: rgba(0, 0, 0, 0.05);
+            --placeholder-color: #D1D1D6; /* 非常淡的提示色 */
+        }
+
+        /* 深色模式 */
+        [data-theme="dark"] {
+            --bg-color: #000000;
+            --card-bg: #1C1C1E;
+            --text-color: #FFFFFF;
+            --text-secondary: #8E8E93;
+            --border-color: #38383A;
+            --primary-color: #0A84FF;
+            --danger-color: #FF453A;
+            --success-color: #30D158;
+            --input-bg: #2C2C2E;
+            --header-bg: rgba(28, 28, 30, 0.9);
+            --shadow-color: rgba(0, 0, 0, 0.2);
+            --placeholder-color: #48484A;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 90px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* 顶部导航 (iOS风格) */
+        header {
+            background-color: var(--header-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 0.5px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: -0.4px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        /* 主要内容区 */
+        main {
+            padding: 16px 0;
+            overflow-x: auto;
+        }
+
+        /* 紧凑布局容器 */
+        #scoreboard {
+            padding: 0 10px;
+            min-width: 100%;
+            /* 适配多列：每列最小宽度60px，自适应 */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 玩家昵称行 */
+        .player-header {
+            display: flex;
+            margin-bottom: 8px;
+            padding-left: 24px; /* 对齐轮次号 */
+        }
+
+        .player-col {
+            flex: 1;
+            min-width: 50px; /* 更紧凑的最小宽度 */
+            text-align: center;
+            padding: 0 2px;
+            position: relative;
+        }
+
+        .player-name-input {
+            width: 100%;
+            padding: 6px 0;
+            text-align: center;
+            border: 1px solid transparent; /* 预留边框位置 */
+            border-radius: 8px;
+            font-weight: 600;
+            background: rgba(0, 0, 0, 0.03); /* 极淡的背景色 */
+            font-size: 15px;
+            color: var(--text-color);
+            transition: all 0.2s;
+        }
+        
+        [data-theme="dark"] .player-name-input {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .player-name-input:focus {
+            background: var(--input-bg);
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        /* 轮次行 */
+        .round-row {
+            display: flex;
+            margin-bottom: 8px;
+            padding: 8px 0;
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 1px 2px var(--shadow-color);
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+
+        .round-row.invalid {
+            box-shadow: 0 0 0 1px var(--danger-color) inset;
+            background-color: rgba(255, 59, 48, 0.05); /* 淡红色背景 */
+        }
+        
+        [data-theme="dark"] .round-row.invalid {
+             background-color: rgba(255, 69, 58, 0.1);
+        }
+
+        .round-info {
+            width: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            min-width: 50px;
+            margin: 0 4px;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .negative-btn {
+            position: absolute;
+            left: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 22px;
+            height: 22px;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.05);
+            border: none;
+            color: var(--text-color);
+            font-size: 20px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 5;
+            padding: 0;
+            padding-bottom: 3px;
+            transition: all 0.2s;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .input-wrapper:focus-within .negative-btn {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .negative-btn:active {
+            background: rgba(0,0,0,0.15);
+        }
+
+        [data-theme="dark"] .negative-btn {
+            background: rgba(255,255,255,0.1);
+        }
+
+        [data-theme="dark"] .negative-btn:active {
+             background: rgba(255,255,255,0.2);
+        }
+
+        .score-input {
+            flex: 1;
+            width: 100%;
+            padding: 8px 0; /* 默认居中，无左侧留白 */
+            margin: 0; 
+            text-align: center;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.03); 
+            font-size: 17px;
+            color: var(--text-color);
+            -moz-appearance: textfield;
+            font-family: "SF Pro Text", monospace; 
+            transition: all 0.2s;
+        }
+        
+        .input-wrapper:focus-within .score-input {
+            padding-left: 28px; /* 聚焦时留出按钮位置 */
+        }
+        
+        [data-theme="dark"] .score-input {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .score-input:focus {
+            background: var(--input-bg);
+            border-color: var(--primary-color); /* 聚焦时显示主色边框 */
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.1);
+        }
+        
+        .score-input::placeholder {
+            color: var(--placeholder-color);
+            font-weight: normal;
+            font-size: 15px;
+            opacity: 0.6; /* 再淡一点 */
+        }
+        
+        .score-input::-webkit-outer-spin-button,
+        .score-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* 底部固定栏 */
+        .footer-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--header-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 0.5px solid var(--border-color);
+            padding: 10px 16px 20px 16px; /* 适配 iPhone X 底部 */
+            z-index: 100;
+        }
+
+        .total-scores {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 12px;
+            padding-left: 24px; /* 对齐 */
+        }
+
+        .total-item {
+            text-align: center;
+            flex: 1;
+            min-width: 50px;
+        }
+
+        .total-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn-add-round {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            border-radius: 22px;
+            font-size: 16px;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        
+        .btn-add-round:active {
+            transform: scale(0.96);
+        }
+
+        /* 工具栏 */
+        .toolbar {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            padding: 0 16px 12px 16px;
+        }
+        
+        .tool-btn {
+            background: var(--card-bg);
+            border: 0.5px solid var(--border-color);
+            color: var(--text-color);
+            padding: 6px 16px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 1px 2px var(--shadow-color);
+        }
+
+        /* 模态框 (iOS Action Sheet风格) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 200;
+            justify-content: center;
+            align-items: flex-end; /* 底部弹出 */
+            padding-bottom: 20px;
+        }
+        
+        .modal-content {
+            background: var(--bg-color);
+            padding: 0;
+            border-radius: 14px;
+            width: 95%;
+            max-width: 400px;
+            overflow: hidden;
+        }
+        
+        .modal-body {
+            background: var(--card-bg);
+            padding: 20px;
+            text-align: center;
+            border-radius: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .modal-title {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+        
+        .modal-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: var(--card-bg);
+            border: none;
+            border-top: 0.5px solid var(--border-color);
+            font-size: 17px;
+            color: var(--danger-color);
+            cursor: pointer;
+            background: transparent;
+        }
+        
+        .modal-cancel {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: var(--card-bg);
+            border-radius: 14px;
+            border: none;
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        @media (min-width: 980px) {
+            :root {
+                --desktop-max-width: 846px;
+            }
+
+            header {
+                padding-left: calc((100vw - var(--desktop-max-width)) / 2 + 16px);
+                padding-right: calc((100vw - var(--desktop-max-width)) / 2 + 16px);
+            }
+
+            main {
+                padding-left: calc((100vw - var(--desktop-max-width)) / 2);
+                padding-right: calc((100vw - var(--desktop-max-width)) / 2);
+            }
+
+            .footer-bar {
+                left: 0;
+                right: 0;
+                width: 100%;
+                transform: none;
+                padding-left: calc((100vw - var(--desktop-max-width)) / 2 + 16px);
+                padding-right: calc((100vw - var(--desktop-max-width)) / 2 + 16px);
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>♠️ 记分板</h1>
+    <div class="header-actions">
+        <button class="icon-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
+        <button class="icon-btn" style="font-size: 14px; font-weight: 500;" onclick="confirmReset()">重置</button>
+    </div>
+</header>
+
+<main>
+    <div class="toolbar">
+        <button class="tool-btn" onclick="addPlayer()">添加席位</button>
+        <button class="tool-btn" onclick="removeLastPlayer()">减少席位</button>
+    </div>
+
+    <div id="scoreboard">
+        <!-- 动态生成的内容 -->
+    </div>
+    
+    <!-- 占位符 -->
+    <div style="height: 120px;"></div>
+</main>
+
+<div class="footer-bar">
+    <div id="total-display" class="total-scores">
+        <!-- 动态生成的总分 -->
+    </div>
+    <div class="action-bar">
+        <button class="btn-add-round" onclick="addRound()">新增一排</button>
+    </div>
+</div>
+
+<!-- 确认重置弹窗 -->
+<div id="resetModal" class="modal">
+    <div style="width: 95%; max-width: 400px; display: flex; flex-direction: column; gap: 8px;">
+        <div class="modal-body" style="margin: 0; padding: 0;">
+            <div style="padding: 16px; font-size: 13px; color: var(--text-secondary);">
+                确认清空所有分数记录？<br>玩家昵称将保留。
+            </div>
+            <button class="modal-btn" onclick="resetData()">清空分数</button>
+        </div>
+        <button class="modal-cancel" onclick="closeModal('resetModal')">取消</button>
+    </div>
+</div>
+
+<script>
+    // 状态管理
+    let state = {
+        theme: 'light', // light or dark
+        players: ['玩家1', '玩家2', '玩家3', '玩家4'], 
+        rounds: [
+            ['', '', '', ''] 
+        ]
+    };
+
+    const STORAGE_KEY = 'quick_score_data_v2';
+    const EXPIRE_DAYS = 7;
+
+    // 保存数据
+    function saveData() {
+        const dataToSave = {
+            state: state,
+            timestamp: new Date().getTime()
+        };
+        const jsonStr = JSON.stringify(dataToSave);
+
+        try {
+            localStorage.setItem(STORAGE_KEY, jsonStr);
+        } catch (e) {
+            console.warn("LocalStorage failed", e);
+        }
+    }
+
+    // 加载数据
+    function loadData() {
+        let jsonStr = null;
+        try {
+            jsonStr = localStorage.getItem(STORAGE_KEY);
+        } catch (e) {}
+
+        if (jsonStr) {
+            try {
+                const data = JSON.parse(jsonStr);
+                const now = new Date().getTime();
+                const diffDays = (now - data.timestamp) / (1000 * 3600 * 24);
+                
+                if (diffDays > EXPIRE_DAYS) {
+                    return false; // 过期
+                }
+                
+                if (data.state && data.state.players) {
+                    // 合并旧数据结构（如果字段缺失）
+                    state = { ...state, ...data.state };
+                    return true;
+                }
+            } catch(e) {}
+        }
+        return false;
+    }
+
+    function init() {
+        loadData();
+        applyTheme();
+        render();
+    }
+
+    // 主题切换
+    function toggleTheme() {
+        state.theme = state.theme === 'light' ? 'dark' : 'light';
+        applyTheme();
+        saveData();
+    }
+
+    function applyTheme() {
+        const btn = document.getElementById('theme-btn');
+        if (state.theme === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            btn.innerText = '☀️';
+        } else {
+            document.body.removeAttribute('data-theme');
+            btn.innerText = '🌙';
+        }
+    }
+
+    function render() {
+        const container = document.getElementById('scoreboard');
+        container.innerHTML = '';
+
+        // 1. 渲染玩家表头
+        const headerRow = document.createElement('div');
+        headerRow.className = 'player-header';
+        
+        state.players.forEach((name, index) => {
+            const col = document.createElement('div');
+            col.className = 'player-col';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'player-name-input';
+            input.value = name;
+            input.onchange = (e) => updatePlayerName(index, e.target.value);
+            
+            col.appendChild(input);
+            headerRow.appendChild(col);
+        });
+        container.appendChild(headerRow);
+
+        // 2. 渲染轮次
+        state.rounds.forEach((roundScores, roundIndex) => {
+            const row = document.createElement('div');
+            row.className = 'round-row';
+            
+            // 验证
+            const validNumbers = roundScores.map(s => parseFloat(s) || 0);
+            const sum = validNumbers.reduce((a, b) => a + b, 0);
+            const allFilled = roundScores.every(s => s !== '' && s !== null);
+            
+            if (allFilled && Math.abs(sum) > 0.01) { // 浮点数比较
+                row.classList.add('invalid');
+            }
+
+            // 提示逻辑
+            let hintValue = null;
+            let emptyIndex = -1;
+            const emptyCount = roundScores.filter(s => s === '' || s === null).length;
+            
+            if (emptyCount === 1) {
+                hintValue = 0 - sum;
+                emptyIndex = roundScores.findIndex(s => s === '' || s === null);
+            }
+
+            // 序号
+            const info = document.createElement('div');
+            info.className = 'round-info';
+            info.innerText = roundIndex + 1;
+            row.appendChild(info);
+
+            // 分数
+            roundScores.forEach((score, playerIndex) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'input-wrapper';
+
+                const negBtn = document.createElement('button');
+                negBtn.className = 'negative-btn';
+                negBtn.innerText = '-';
+                negBtn.tabIndex = -1;
+                
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.className = 'score-input';
+                input.value = score;
+                
+                // Click handler for negative button
+                // Use onmousedown to prevent focus loss
+                negBtn.onmousedown = (e) => {
+                    e.preventDefault(); // Prevent input blur
+                    let val = input.value;
+                    if (val.startsWith('-')) {
+                        val = val.substring(1);
+                    } else {
+                        val = '-' + val;
+                    }
+                    input.value = val;
+                    updateScore(roundIndex, playerIndex, val);
+                    // Input remains focused
+                };
+                
+                if (playerIndex === emptyIndex && hintValue !== null) {
+                     // 如果是整数，不显示小数位；如果是小数，显示一位
+                     const displayHint = Number.isInteger(hintValue) ? hintValue : hintValue.toFixed(1);
+                     input.placeholder = displayHint;
+                } else {
+                     input.placeholder = '';
+                }
+
+                input.oninput = (e) => updateScore(roundIndex, playerIndex, e.target.value);
+                // Removed onblur re-render to prevent UI jumping and focus issues
+ 
+
+                wrapper.appendChild(negBtn);
+                wrapper.appendChild(input);
+                row.appendChild(wrapper);
+            });
+
+            container.appendChild(row);
+        });
+
+        renderTotals();
+    }
+
+    function renderTotals() {
+        const totalContainer = document.getElementById('total-display');
+        totalContainer.innerHTML = '';
+        
+        const totals = new Array(state.players.length).fill(0);
+        state.rounds.forEach(round => {
+            round.forEach((score, idx) => {
+                if (idx < totals.length) {
+                    totals[idx] += (parseFloat(score) || 0);
+                }
+            });
+        });
+
+        state.players.forEach((name, index) => {
+            const item = document.createElement('div');
+            item.className = 'total-item';
+            
+            const value = document.createElement('div');
+            value.className = 'total-value';
+            const total = totals[index];
+            // 格式化数字：如果是整数显示整数，否则保留1位小数
+            value.innerText = Number.isInteger(total) ? total : total.toFixed(1);
+            
+            // 颜色逻辑：使用CSS变量
+            if (total > 0) value.style.color = 'var(--danger-color)';
+            else if (total < 0) value.style.color = 'var(--success-color)';
+            else value.style.color = 'var(--text-color)';
+
+            item.appendChild(value);
+            totalContainer.appendChild(item);
+        });
+    }
+
+    function updatePlayerName(index, newName) {
+        state.players[index] = newName;
+        saveData();
+    }
+
+    function updateScore(roundIndex, playerIndex, value) {
+        if (value === '' || value === '-') {
+            state.rounds[roundIndex][playerIndex] = value;
+        } else {
+            state.rounds[roundIndex][playerIndex] = parseFloat(value);
+        }
+        
+        // 简单实时验证：仅更新样式
+        const currentScores = state.rounds[roundIndex];
+        const allFilled = currentScores.every(s => s !== '' && s !== null);
+        const sum = currentScores.reduce((a, b) => a + (parseFloat(b)||0), 0);
+        
+        const rows = document.querySelectorAll('.round-row');
+        if (rows[roundIndex]) {
+            if (allFilled && Math.abs(sum) > 0.01) {
+                rows[roundIndex].classList.add('invalid');
+            } else {
+                rows[roundIndex].classList.remove('invalid');
+            }
+            
+            // 更新placeholder
+            const inputs = rows[roundIndex].querySelectorAll('.score-input');
+            inputs.forEach(input => input.placeholder = '');
+            
+            const emptyCount = currentScores.filter(s => s === '' || s === null).length;
+            if (emptyCount === 1) {
+                 const emptyIdx = currentScores.findIndex(s => s === '' || s === null);
+                 const hint = 0 - sum;
+                 const displayHint = Number.isInteger(hint) ? hint : hint.toFixed(1);
+                 inputs[emptyIdx].placeholder = displayHint;
+            }
+        }
+
+        saveData();
+        renderTotals();
+    }
+
+    function addRound() {
+        const newRow = new Array(state.players.length).fill('');
+        state.rounds.push(newRow);
+        saveData();
+        render();
+        setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 100);
+    }
+
+    function addPlayer() {
+        const newIndex = state.players.length + 1;
+        state.players.push(`玩家${newIndex}`);
+        state.rounds.forEach(round => round.push(''));
+        saveData();
+        render();
+    }
+
+    function removeLastPlayer() {
+        if (state.players.length <= 2) {
+            alert("至少保留2个席位");
+            return;
+        }
+        if (confirm(`确定要删除 "${state.players[state.players.length-1]}" 吗？`)) {
+            state.players.pop();
+            state.rounds.forEach(round => round.pop());
+            saveData();
+            render();
+        }
+    }
+
+    function confirmReset() {
+        document.getElementById('resetModal').style.display = 'flex';
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    function resetData() {
+        // 只重置分数，保留玩家
+        state.rounds = [['', '', '', ''].slice(0, state.players.length).fill('')]; 
+        // 重新构建第一行，确保长度和玩家数一致
+        const firstRow = new Array(state.players.length).fill('');
+        state.rounds = [firstRow];
+        
+        saveData();
+        render();
+        closeModal('resetModal');
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+
+</script>
+
+</body>
+</html>

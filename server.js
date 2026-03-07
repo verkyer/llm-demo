@@ -84,6 +84,19 @@ function safeResolve(relUrlPath) {
   return fsPath;
 }
 
+function readIndexTitle(absDir) {
+  const indexPath = path.join(absDir, 'index.html');
+  if (!fs.existsSync(indexPath)) return '';
+  try {
+    const html = fs.readFileSync(indexPath, 'utf8');
+    const m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    if (!m) return '';
+    return m[1].replace(/\s+/g, ' ').trim();
+  } catch {
+    return '';
+  }
+}
+
 function buildDirTree(relPosixDir = '') {
   const abs = relPosixDir ? path.join(BASE_DIR, ...relPosixDir.split('/')) : BASE_DIR;
 
@@ -97,8 +110,9 @@ function buildDirTree(relPosixDir = '') {
     const relChild = relPosixDir ? `${relPosixDir}/${name}` : name;
     const absChild = path.join(abs, name);
     const hasIndex = fs.existsSync(path.join(absChild, 'index.html'));
+    const indexTitle = hasIndex ? readIndexTitle(absChild) : '';
     const children = buildDirTree(relChild);
-    return { name, rel: relChild, hasIndex, children };
+    return { name, rel: relChild, hasIndex, indexTitle, children };
   });
 }
 
@@ -110,6 +124,8 @@ function renderTree(nodes) {
       ${list.map((n) => {
         const href = `${toUrlPath(n.rel)}/${n.hasIndex ? 'index.html' : ''}`;
         const title = escapeHtml(n.name);
+        const indexTitle = escapeHtml(n.indexTitle || '');
+        const searchText = escapeHtml(`${n.name} ${n.indexTitle || ''}`.trim());
         const isBranch = n.children && n.children.length > 0;
         const itemClass = isBranch ? 'tree-item branch' : 'tree-item leaf';
         
@@ -127,7 +143,7 @@ function renderTree(nodes) {
 
         if (isBranch) {
           return `
-            <li class="${itemClass}" data-name="${title}">
+            <li class="${itemClass}" data-name="${searchText}">
               <div class="item-content branch-header">
                 <span class="toggle-icon">
                     <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -143,10 +159,11 @@ function renderTree(nodes) {
           `;
         } else {
           return `
-            <li class="${itemClass}" data-name="${title}">
+            <li class="${itemClass}" data-name="${searchText}">
               <a href="${href}" target="_blank" class="item-content link-item">
                 <span class="icon-wrapper">${icon}</span>
                 <span class="name">${title}</span>
+                ${indexTitle ? `<span class="page-title">${indexTitle}</span>` : ''}
                 <span class="action-icon">
                     <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                 </span>
@@ -172,15 +189,40 @@ function renderHomePage() {
     <title>HTML 项目演示</title>
     <style>
       :root {
-        --bg-color: #f9fafb;
-        --card-bg: #ffffff;
-        --text-primary: #111827;
-        --text-secondary: #6b7280;
-        --accent-color: #000000;
-        --accent-hover: #333333;
-        --border-color: #e5e7eb;
-        --hover-bg: #f3f4f6;
+        --bg-start: #f7f8fa;
+        --bg-end: #f2f4f7;
+        --card-bg: rgba(255, 255, 255, 0.82);
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --accent-color: #4f46e5;
+        --accent-hover: #4338ca;
+        --border-color: rgba(15, 23, 42, 0.1);
+        --hover-bg: rgba(255, 255, 255, 0.94);
+        --card-shadow: 0 1px 1px rgba(15, 23, 42, 0.03), 0 8px 24px rgba(15, 23, 42, 0.05);
+        --card-shadow-hover: 0 2px 2px rgba(15, 23, 42, 0.05), 0 14px 32px rgba(15, 23, 42, 0.08);
+        --theme-btn-bg: rgba(255, 255, 255, 0.7);
+        --theme-btn-bg-hover: rgba(255, 255, 255, 0.92);
+        --theme-btn-icon: rgba(15, 23, 42, 0.72);
+        --focus-ring: 0 0 0 3px rgba(79, 70, 229, 0.16);
         --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      }
+
+      [data-theme="dark"] {
+        --bg-start: #0b1220;
+        --bg-end: #070d19;
+        --card-bg: rgba(17, 24, 39, 0.82);
+        --text-primary: #e5e7eb;
+        --text-secondary: #9ca3af;
+        --accent-color: #a5b4fc;
+        --accent-hover: #c7d2fe;
+        --border-color: rgba(148, 163, 184, 0.2);
+        --hover-bg: rgba(17, 24, 39, 0.94);
+        --card-shadow: 0 1px 1px rgba(2, 6, 23, 0.28), 0 10px 30px rgba(2, 6, 23, 0.36);
+        --card-shadow-hover: 0 2px 2px rgba(2, 6, 23, 0.34), 0 16px 38px rgba(2, 6, 23, 0.45);
+        --theme-btn-bg: rgba(17, 24, 39, 0.72);
+        --theme-btn-bg-hover: rgba(17, 24, 39, 0.92);
+        --theme-btn-icon: rgba(229, 231, 235, 0.8);
+        --focus-ring: 0 0 0 3px rgba(165, 180, 252, 0.2);
       }
       
       * { box-sizing: border-box; }
@@ -188,10 +230,12 @@ function renderHomePage() {
       body {
         margin: 0;
         font-family: var(--font-sans);
-        background-color: var(--bg-color);
+        background: linear-gradient(165deg, var(--bg-start), var(--bg-end));
         color: var(--text-primary);
         line-height: 1.5;
         -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+        transition: background 0.2s ease, color 0.2s ease;
       }
 
       .container {
@@ -206,9 +250,9 @@ function renderHomePage() {
       }
 
       h1 {
-        font-size: 2.25rem;
-        font-weight: 800;
-        letter-spacing: -0.025em;
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
         margin: 0 0 1.5rem 0;
         color: var(--text-primary);
       }
@@ -224,18 +268,21 @@ function renderHomePage() {
         padding: 1rem 1.5rem 1rem 3rem;
         padding-right: 3.25rem;
         font-size: 1rem;
-        border: 1px solid transparent;
+        border: 1px solid var(--border-color);
         border-radius: 1rem;
-        background: white;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        background: var(--card-bg);
+        box-shadow: var(--card-shadow);
         transition: all 0.2s ease;
         outline: none;
         position: relative;
         z-index: 1;
+        color: var(--text-primary);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
       }
 
       .search-input:focus {
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+        box-shadow: var(--focus-ring), var(--card-shadow-hover);
         transform: translateY(-1px);
       }
       
@@ -264,7 +311,7 @@ function renderHomePage() {
         height: 1.75rem;
         border-radius: 0.6rem;
         border: 1px solid var(--border-color);
-        background: #fff;
+        background: var(--card-bg);
         color: var(--text-secondary);
         display: none;
         align-items: center;
@@ -277,7 +324,7 @@ function renderHomePage() {
       .clear-btn:hover {
         background: var(--hover-bg);
         color: var(--text-primary);
-        border-color: #d1d5db;
+        border-color: var(--border-color);
       }
 
       .card {
@@ -298,7 +345,7 @@ function renderHomePage() {
         display: flex;
         align-items: center;
         padding: 1rem 1.25rem;
-        background: white;
+        background: var(--card-bg);
         border: 1px solid var(--border-color);
         border-radius: 0.75rem;
         transition: all 0.2s ease;
@@ -306,11 +353,14 @@ function renderHomePage() {
         color: var(--text-primary);
         cursor: pointer;
         position: relative;
+        box-shadow: var(--card-shadow);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
       }
 
       .item-content:hover {
-        border-color: #d1d5db;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        border-color: var(--border-color);
+        box-shadow: var(--card-shadow-hover);
         transform: translateY(-1px);
       }
 
@@ -340,6 +390,24 @@ function renderHomePage() {
         font-weight: 500;
         font-size: 1rem;
         flex: 1;
+      }
+
+      .link-item .name {
+        flex: 0 1 auto;
+        min-width: 0;
+      }
+
+      .page-title {
+        color: var(--text-secondary);
+        font-size: 0.8125rem;
+        font-weight: 400;
+        opacity: 0.66;
+        margin-left: 0.5rem;
+        flex: 1;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .toggle-icon {
@@ -438,6 +506,51 @@ function renderHomePage() {
         text-decoration: underline;
       }
 
+      .theme-toggle {
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        border: 1px solid var(--border-color);
+        background: var(--theme-btn-bg);
+        color: var(--theme-btn-icon);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: var(--card-shadow);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.2s ease;
+      }
+
+      .theme-toggle:hover {
+        background: var(--theme-btn-bg-hover);
+        box-shadow: var(--card-shadow-hover);
+        transform: translateY(-1px);
+      }
+
+      .theme-toggle:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring), var(--card-shadow-hover);
+      }
+
+      .theme-toggle svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      @media (max-width: 768px) {
+        .theme-toggle {
+          top: 1.1rem;
+          right: 1.1rem;
+          width: 44px;
+          height: 44px;
+        }
+      }
+
       @keyframes slideDown {
         from { opacity: 0; transform: translateY(-5px); }
         to { opacity: 1; transform: translateY(0); }
@@ -448,6 +561,11 @@ function renderHomePage() {
   </head>
   <body>
     <div class="container">
+      <button id="themeToggle" class="theme-toggle" type="button" aria-label="切换深浅色">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3c0 0 0 0 0 0A7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
       <header>
         <h1>HTML 项目演示</h1>
         <div class="search-wrapper">
@@ -476,6 +594,20 @@ function renderHomePage() {
       const clearSearch = document.getElementById('clearSearch');
       const treeItems = document.querySelectorAll('.tree-item');
       const noResults = document.getElementById('noResults');
+      const themeToggle = document.getElementById('themeToggle');
+
+      const getPreferredTheme = () => {
+        const storedTheme = localStorage.getItem('theme');
+        if (storedTheme === 'light' || storedTheme === 'dark') return storedTheme;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      };
+
+      const applyTheme = (theme) => {
+        document.documentElement.setAttribute('data-theme', theme);
+        themeToggle.setAttribute('aria-label', theme === 'dark' ? '切换为浅色模式' : '切换为深色模式');
+      };
+
+      applyTheme(getPreferredTheme());
 
       const updateClearVisibility = () => {
         const hasValue = searchInput.value.trim().length > 0;
@@ -529,6 +661,13 @@ function renderHomePage() {
         searchInput.value = '';
         searchInput.dispatchEvent(new Event('input', { bubbles: true }));
         searchInput.focus();
+      });
+
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(nextTheme);
+        localStorage.setItem('theme', nextTheme);
       });
 
       updateClearVisibility();
