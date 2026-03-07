@@ -442,14 +442,19 @@
 
     <script>
       const PROJECTS = [
-        { name: 'demo', rel: 'demo', pageTitle: 'Hello World', hasIndex: true, children: [] },
-        { name: 'swift-score', rel: 'swift-score', pageTitle: 'Swift Score', hasIndex: true, children: [] },
+        { name: 'demo', rel: 'demo', hasIndex: true, children: [] },
+        { name: 'swift-score', rel: 'swift-score', hasIndex: true, children: [] },
         {
           name: 'one-pages',
           rel: 'one-pages',
           hasIndex: false,
           children: [
-            { name: 'glm5', rel: 'one-pages/glm5', hasIndex: true, children: [] },
+            {
+              name: 'glm5',
+              rel: 'one-pages/glm5',
+              hasIndex: true,
+              children: [],
+            },
             {
               name: 'kimi-k2.5',
               rel: 'one-pages/kimi-k2.5',
@@ -496,8 +501,7 @@
               .map((n) => {
                 const href = `${toUrlPath(n.rel)}/${n.hasIndex ? 'index.html' : ''}`
                 const title = escapeHtml(n.name)
-                const pageTitle = escapeHtml(n.pageTitle || '')
-                const searchText = escapeHtml(`${n.name} ${n.pageTitle || ''}`.trim())
+                const searchText = escapeHtml(n.name)
                 const isBranch = n.children && n.children.length > 0
                 const itemClass = isBranch ? 'tree-item branch' : 'tree-item leaf'
 
@@ -524,11 +528,11 @@
                 }
 
                 return `
-                  <li class="${itemClass}" data-name="${searchText}">
+                  <li class="${itemClass}" data-name="${searchText}" data-project-name="${title}">
                     <a href="${href}" target="_blank" class="item-content link-item">
                       <span class="icon-wrapper">${icon}</span>
                       <span class="name">${title}</span>
-                      ${pageTitle ? `<span class="page-title">${pageTitle}</span>` : ''}
+                      <span class="page-title"></span>
                       <span class="action-icon">
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                       </span>
@@ -562,6 +566,41 @@
       treeContainer.innerHTML = renderTree(PROJECTS)
 
       const treeItems = () => document.querySelectorAll('.tree-item')
+      const leafItems = () => document.querySelectorAll('.tree-item.leaf')
+
+      const extractTitle = (htmlText) => {
+        const doc = new DOMParser().parseFromString(htmlText, 'text/html')
+        return doc.title ? doc.title.trim() : ''
+      }
+
+      const updateItemSearchText = (item, pageTitle) => {
+        const projectName = item.getAttribute('data-project-name') || ''
+        item.setAttribute('data-name', `${projectName} ${pageTitle}`.trim().toLowerCase())
+      }
+
+      const hydratePageTitles = async () => {
+        const tasks = Array.from(leafItems()).map(async (item) => {
+          const link = item.querySelector('a.link-item')
+          const titleNode = item.querySelector('.page-title')
+          if (!link || !titleNode) return
+          const projectName = item.getAttribute('data-project-name') || ''
+          titleNode.textContent = ''
+          updateItemSearchText(item, '')
+          try {
+            const res = await fetch(link.href, { cache: 'no-store' })
+            if (!res.ok) return
+            const htmlText = await res.text()
+            const pageTitle = extractTitle(htmlText)
+            if (!pageTitle) return
+            titleNode.textContent = pageTitle
+            updateItemSearchText(item, pageTitle)
+          } catch {}
+          if (!titleNode.textContent) updateItemSearchText(item, '')
+          if (!titleNode.textContent) titleNode.remove()
+        })
+        await Promise.allSettled(tasks)
+        if (searchInput.value.trim()) searchInput.dispatchEvent(new Event('input', { bubbles: true }))
+      }
 
       const updateClearVisibility = () => {
         const hasValue = searchInput.value.trim().length > 0
@@ -633,6 +672,7 @@
       })
 
       updateClearVisibility()
+      hydratePageTitles()
     </script>
   </body>
 </html>
