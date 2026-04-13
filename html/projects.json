@@ -54,6 +54,12 @@
     "hasIndex": false,
     "children": [
       {
+        "name": "glm5",
+        "rel": "wordpress-theme/glm5",
+        "hasIndex": true,
+        "children": []
+      },
+      {
         "name": "qwen3.6-plus",
         "rel": "wordpress-theme/qwen3.6-plus",
         "hasIndex": true,
