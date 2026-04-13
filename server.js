@@ -760,6 +760,23 @@ function handleRequest(req, res) {
     const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
     const pathname = decodeURIComponent(url.pathname || '/');
 
+    if (pathname === '/api/projects') {
+      const tree = buildDirTree('');
+      const json = JSON.stringify(tree);
+      if (req.method === 'HEAD') {
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end();
+        return;
+      }
+      res.writeHead(200, {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Content-Length': Buffer.byteLength(json),
+        'Cache-Control': 'no-cache',
+      });
+      res.end(json);
+      return;
+    }
+
     if (pathname === '/') {
       const html = renderHomePage();
       if (req.method === 'HEAD') {

@@ -8,6 +8,26 @@ export default {
     const url = new URL(request.url)
     const pathname = url.pathname
 
+    // Handle /api/projects by serving static projects.json
+    if (pathname === "/api/projects") {
+      url.pathname = "/projects.json"
+      const assetRequest = new Request(url.toString(), request)
+      const response = await env.ASSETS.fetch(assetRequest)
+      if (response.status === 200) {
+        return new Response(response.body, {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json; charset=utf-8",
+            "Cache-Control": "no-cache",
+          },
+        })
+      }
+      return new Response("[]", {
+        status: 200,
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+      })
+    }
+
     const candidates = []
     if (pathname === "/") {
       candidates.push("/index.html")
