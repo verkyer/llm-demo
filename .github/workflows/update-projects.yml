@@ -28,6 +28,6 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add html/projects.json
-          git diff --staged --quiet || git commit -m "Auto-update projects.json [skip ci]"
+          git add html/projects.json html/index.html
+          git diff --staged --quiet || git commit -m "Auto-update projects.json and index.html [skip ci]"
           git push

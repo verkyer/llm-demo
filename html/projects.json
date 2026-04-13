@@ -3,41 +3,48 @@
     "name": "demo",
     "rel": "demo",
     "hasIndex": true,
+    "indexTitle": "这是一个测试的HTML",
     "children": []
   },
   {
     "name": "one-pages",
     "rel": "one-pages",
     "hasIndex": false,
+    "indexTitle": "",
     "children": [
       {
         "name": "claude-4.6-opus",
         "rel": "one-pages/claude-4.6-opus",
         "hasIndex": true,
+        "indexTitle": "Alex Chen — Creative Developer",
         "children": []
       },
       {
         "name": "glm5",
         "rel": "one-pages/glm5",
         "hasIndex": true,
+        "indexTitle": "ALEX CHEN | Creative Developer",
         "children": []
       },
       {
         "name": "kimi-k2.5",
         "rel": "one-pages/kimi-k2.5",
         "hasIndex": true,
+        "indexTitle": "Alex Chen | 赛博全栈开发者",
         "children": []
       },
       {
         "name": "minimax-m2.5",
         "rel": "one-pages/minimax-m2.5",
         "hasIndex": true,
+        "indexTitle": "PORTFOLIO | 酷炫个人主页",
         "children": []
       },
       {
         "name": "qwen3.5-plus",
         "rel": "one-pages/qwen3.5-plus",
         "hasIndex": true,
+        "indexTitle": "NEO | 个人主页",
         "children": []
       }
     ]
@@ -46,23 +53,27 @@
     "name": "swift-score",
     "rel": "swift-score",
     "hasIndex": true,
+    "indexTitle": "快速记分板",
     "children": []
   },
   {
     "name": "wordpress-theme",
     "rel": "wordpress-theme",
     "hasIndex": false,
+    "indexTitle": "",
     "children": [
       {
         "name": "glm5",
         "rel": "wordpress-theme/glm5",
         "hasIndex": true,
+        "indexTitle": "墨迹 - 简约博客",
         "children": []
       },
       {
         "name": "qwen3.6-plus",
         "rel": "wordpress-theme/qwen3.6-plus",
         "hasIndex": true,
+        "indexTitle": "MORNING — 简约博客主题",
         "children": []
       }
     ]

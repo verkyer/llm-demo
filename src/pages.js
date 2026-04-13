@@ -1,4 +1,13 @@
-<!doctype html>
+const fs = require('node:fs');
+const path = require('node:path');
+const { escapeHtml, toUrlPath } = require('./utils');
+const { buildDirTree, renderTree } = require('./tree');
+
+function renderHomePage(BASE_DIR) {
+  const tree = buildDirTree(BASE_DIR, '');
+  const content = renderTree(tree);
+
+  return `<!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
@@ -396,140 +405,7 @@
 
       <main class="card">
         <div id="treeContainer">
-          <ul class="tree-root">
-      
-            <li class="tree-item leaf" data-name="demo 这是一个测试的HTML">
-              <a href="/demo/index.html" target="_blank" class="item-content link-item">
-                <span class="icon-wrapper"><svg class="icon-svg file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></span>
-                <span class="name">demo</span>
-                <span class="page-title">这是一个测试的HTML</span>
-                <span class="action-icon">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                </span>
-              </a>
-            </li>
-          
-            <li class="tree-item branch" data-name="one-pages">
-              <div class="item-content branch-header">
-                <span class="toggle-icon">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </span>
-                <span class="icon-wrapper"><svg class="icon-svg folder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></span>
-                <span class="name">one-pages</span>
-                
-              </div>
-              <div class="branch-content">
-                <ul class="tree-root">
-      
-            <li class="tree-item leaf" data-name="claude-4.6-opus Alex Chen — Creative Developer">
-              <a href="/one-pages/claude-4.6-opus/index.html" target="_blank" class="item-content link-item">
-                <span class="icon-wrapper"><svg class="icon-svg file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></span>
-                <span class="name">claude-4.6-opus</span>
-                <span class="page-title">Alex Chen — Creative Developer</span>
-                <span class="action-icon">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                </span>
-              </a>
-            </li>
-          
-            <li class="tree-item leaf" data-name="glm5 ALEX CHEN | Creative Developer">
-              <a href="/one-pages/glm5/index.html" target="_blank" class="item-content link-item">
-                <span class="icon-wrapper"><svg class="icon-svg file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></span>
-                <span class="name">glm5</span>
-                <span class="page-title">ALEX CHEN | Creative Developer</span>
-                <span class="action-icon">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                </span>
-              </a>
-            </li>
-          
-            <li class="tree-item leaf" data-name="kimi-k2.5 Alex Chen | 赛博全栈开发者">
-              <a href="/one-pages/kimi-k2.5/index.html" target="_blank" class="item-content link-item">
-                <span class="icon-wrapper"><svg class="icon-svg file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></span>
-                <span class="name">kimi-k2.5</span>
-                <span class="page-title">Alex Chen | 赛博全栈开发者</span>
-                <span class="action-icon">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                </span>
-              </a>
-            </li>
-          
-            <li class="tree-item leaf" data-name="minimax-m2.5 PORTFOLIO | 酷炫个人主页">
-              <a href="/one-pages/minimax-m2.5/index.html" target="_blank" class="item-content link-item">
-                <span class="icon-wrapper"><svg class="icon-svg file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></span>
-                <span class="name">minimax-m2.5</span>
-                <span class="page-title">PORTFOLIO | 酷炫个人主页</span>
-                <span class="action-icon">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                </span>
-              </a>
-            </li>
-          
-            <li class="tree-item leaf" data-name="qwen3.5-plus NEO | 个人主页">
-              <a href="/one-pages/qwen3.5-plus/index.html" target="_blank" class="item-content link-item">
-                <span class="icon-wrapper"><svg class="icon-svg file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></span>
-                <span class="name">qwen3.5-plus</span>
-                <span class="page-title">NEO | 个人主页</span>
-                <span class="action-icon">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                </span>
-              </a>
-            </li>
-          
-    </ul>
-              </div>
-            </li>
-          
-            <li class="tree-item leaf" data-name="swift-score 快速记分板">
-              <a href="/swift-score/index.html" target="_blank" class="item-content link-item">
-                <span class="icon-wrapper"><svg class="icon-svg file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></span>
-                <span class="name">swift-score</span>
-                <span class="page-title">快速记分板</span>
-                <span class="action-icon">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                </span>
-              </a>
-            </li>
-          
-            <li class="tree-item branch" data-name="wordpress-theme">
-              <div class="item-content branch-header">
-                <span class="toggle-icon">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </span>
-                <span class="icon-wrapper"><svg class="icon-svg folder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></span>
-                <span class="name">wordpress-theme</span>
-                
-              </div>
-              <div class="branch-content">
-                <ul class="tree-root">
-      
-            <li class="tree-item leaf" data-name="glm5 墨迹 - 简约博客">
-              <a href="/wordpress-theme/glm5/index.html" target="_blank" class="item-content link-item">
-                <span class="icon-wrapper"><svg class="icon-svg file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></span>
-                <span class="name">glm5</span>
-                <span class="page-title">墨迹 - 简约博客</span>
-                <span class="action-icon">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                </span>
-              </a>
-            </li>
-          
-            <li class="tree-item leaf" data-name="qwen3.6-plus MORNING — 简约博客主题">
-              <a href="/wordpress-theme/qwen3.6-plus/index.html" target="_blank" class="item-content link-item">
-                <span class="icon-wrapper"><svg class="icon-svg file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></span>
-                <span class="name">qwen3.6-plus</span>
-                <span class="page-title">MORNING — 简约博客主题</span>
-                <span class="action-icon">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                </span>
-              </a>
-            </li>
-          
-    </ul>
-              </div>
-            </li>
-          
-    </ul>
+          ${content}
         </div>
         <div id="noResults" class="no-results">没有找到相关项目</div>
       </main>
@@ -631,4 +507,62 @@
       });
     </script>
   </body>
-</html>
+</html>`;
+}
+
+function renderDirListing(BASE_DIR, relPosixDir, absDir) {
+  const entries = fs.readdirSync(absDir, { withFileTypes: true });
+  const dirs = entries
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name)
+    .sort((a, b) => a.localeCompare(b, 'zh-CN'));
+  const files = entries
+    .filter((e) => e.isFile())
+    .map((e) => e.name)
+    .sort((a, b) => a.localeCompare(b, 'zh-CN'));
+
+  const baseHref = relPosixDir ? `${toUrlPath(relPosixDir)}/` : '/';
+  const parentRel = relPosixDir
+    ? (() => {
+        const p = path.posix.dirname(relPosixDir);
+        return p === '.' ? '' : p;
+      })()
+    : '';
+
+  const list = [
+    relPosixDir
+      ? `<li><a href="${toUrlPath(parentRel)}/">..</a></li>`
+      : '',
+    ...dirs.map((d) => `<li><a href="${baseHref}${encodeURIComponent(d)}/">${escapeHtml(d)}/</a></li>`),
+    ...files.map((f) => `<li><a href="${baseHref}${encodeURIComponent(f)}">${escapeHtml(f)}</a></li>`),
+  ]
+    .filter(Boolean)
+    .join('');
+
+  return `<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${escapeHtml(relPosixDir || 'html')}</title>
+    <style>
+      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 24px; line-height: 1.6; }
+      a { color: #0b57d0; text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      ul { padding-left: 20px; }
+      li { margin: 6px 0; }
+      .meta { color: #666; margin-bottom: 12px; }
+      code { background: #f5f5f5; padding: 2px 6px; border-radius: 6px; }
+    </style>
+  </head>
+  <body>
+    <div class="meta">目录：<code>${escapeHtml(path.join(BASE_DIR, ...relPosixDir.split('/').filter(Boolean)))}</code></div>
+    <ul>${list}</ul>
+  </body>
+</html>`;
+}
+
+module.exports = {
+  renderHomePage,
+  renderDirListing,
+};
