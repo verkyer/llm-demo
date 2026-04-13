@@ -1,0 +1,2455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MORNING — 简约博客主题</title>
+<style>
+  /* ============ CSS VARIABLES ============ */
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent-hover: #d63050;
+    --bg: #fafafa;
+    --card-bg: #ffffff;
+    --text: #2d2d2d;
+    --text-light: #777777;
+    --text-lighter: #aaaaaa;
+    --border: #eeeeee;
+    --shadow: 0 2px 20px rgba(0,0,0,0.06);
+    --shadow-hover: 0 8px 30px rgba(0,0,0,0.12);
+    --radius: 12px;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --font: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+    --max-width: 1200px;
+    --sidebar-width: 320px;
+  }
+
+  /* ============ RESET & BASE ============ */
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+    transition: var(--transition);
+  }
+
+  img {
+    max-width: 100%;
+    display: block;
+  }
+
+  /* ============ PAGE SYSTEM ============ */
+  .page {
+    display: none;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .page.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============ HEADER / NAV ============ */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    transition: var(--transition);
+  }
+
+  .header.scrolled {
+    box-shadow: 0 1px 20px rgba(0,0,0,0.06);
+  }
+
+  .header-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--primary);
+    cursor: pointer;
+  }
+
+  .logo span {
+    color: var(--accent);
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .nav a {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-light);
+    position: relative;
+  }
+
+  .nav a:hover,
+  .nav a.active {
+    color: var(--text);
+    background: rgba(0,0,0,0.04);
+  }
+
+  .nav a.active {
+    color: var(--accent);
+  }
+
+  .search-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: var(--primary);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    margin-left: 0.5rem;
+    transition: var(--transition);
+  }
+
+  .search-btn:hover {
+    background: var(--accent);
+    transform: scale(1.05);
+  }
+
+  .menu-toggle {
+    display: none;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .menu-toggle span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--text);
+    border-radius: 2px;
+    transition: var(--transition);
+  }
+
+  /* ============ HERO ============ */
+  .hero {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 4rem 2rem 3rem;
+    text-align: center;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    line-height: 1.2;
+    color: var(--primary);
+    margin-bottom: 1rem;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .hero p {
+    font-size: 1.15rem;
+    color: var(--text-light);
+    max-width: 560px;
+    margin: 0 auto 2rem;
+    line-height: 1.7;
+  }
+
+  .hero-tags {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .hero-tags span {
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    background: var(--card-bg);
+    color: var(--text-light);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .hero-tags span:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ============ LAYOUT ============ */
+  .container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr var(--sidebar-width);
+    gap: 3rem;
+    align-items: start;
+  }
+
+  /* ============ POST CARDS ============ */
+  .posts {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .post-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    cursor: pointer;
+  }
+
+  .post-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-3px);
+  }
+
+  .post-card .thumb {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+    transition: var(--transition);
+  }
+
+  .post-card:hover .thumb {
+    transform: scale(1.03);
+  }
+
+  .thumb-wrapper {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .thumb-wrapper .category-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .post-card .content {
+    padding: 1.8rem;
+  }
+
+  .post-card .meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.8rem;
+    font-size: 0.82rem;
+    color: var(--text-lighter);
+  }
+
+  .post-card .meta .author {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .post-card .meta .author img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .post-card h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: -0.3px;
+    margin-bottom: 0.6rem;
+    color: var(--primary);
+    transition: var(--transition);
+  }
+
+  .post-card:hover h2 {
+    color: var(--accent);
+  }
+
+  .post-card .excerpt {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .post-card .read-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 1.2rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .post-card .read-more::after {
+    content: '→';
+    transition: var(--transition);
+  }
+
+  .post-card:hover .read-more::after {
+    transform: translateX(4px);
+  }
+
+  /* Featured post (first one, horizontal) */
+  .post-card.featured {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .post-card.featured .thumb {
+    height: 100%;
+    min-height: 340px;
+  }
+
+  .post-card.featured .content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2.5rem;
+  }
+
+  .post-card.featured h2 {
+    font-size: 1.6rem;
+  }
+
+  /* ============ SIDEBAR ============ */
+  .sidebar {
+    position: sticky;
+    top: 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .widget {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 1.8rem;
+    box-shadow: var(--shadow);
+  }
+
+  .widget h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    color: var(--primary);
+    letter-spacing: -0.3px;
+    position: relative;
+    padding-bottom: 0.8rem;
+  }
+
+  .widget h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 30px;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  /* Author Widget */
+  .author-widget {
+    text-align: center;
+  }
+
+  .author-widget h3::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .author-widget .avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 1rem;
+    border: 3px solid var(--border);
+  }
+
+  .author-widget .name {
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .author-widget .bio {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+  }
+
+  .author-widget .social-links {
+    display: flex;
+    justify-content: center;
+    gap: 0.6rem;
+  }
+
+  .author-widget .social-links a {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    transition: var(--transition);
+  }
+
+  .author-widget .social-links a:hover {
+    background: var(--accent);
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  /* Categories Widget */
+  .cat-list {
+    list-style: none;
+  }
+
+  .cat-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+
+  .cat-list li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .cat-list li:first-child {
+    padding-top: 0;
+  }
+
+  .cat-list li a {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .cat-list li a:hover {
+    color: var(--accent);
+  }
+
+  .cat-list li .count {
+    background: var(--bg);
+    padding: 0.15rem 0.6rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    color: var(--text-lighter);
+    font-weight: 600;
+  }
+
+  /* Popular Posts Widget */
+  .popular-post {
+    display: flex;
+    gap: 1rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+
+  .popular-post:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .popular-post:first-child {
+    padding-top: 0;
+  }
+
+  .popular-post .num {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--border);
+    line-height: 1;
+    min-width: 28px;
+  }
+
+  .popular-post .info h4 {
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 0.2rem;
+    transition: var(--transition);
+  }
+
+  .popular-post:hover .info h4 {
+    color: var(--accent);
+  }
+
+  .popular-post .info .date {
+    font-size: 0.75rem;
+    color: var(--text-lighter);
+  }
+
+  /* Tag Cloud Widget */
+  .tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tag-cloud a {
+    padding: 0.35rem 0.85rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    background: var(--bg);
+    color: var(--text-light);
+    border: 1px solid transparent;
+    transition: var(--transition);
+  }
+
+  .tag-cloud a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(233,69,96,0.05);
+  }
+
+  /* Newsletter Widget */
+  .newsletter p {
+    font-size: 0.88rem;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+  }
+
+  .newsletter input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: var(--font);
+    margin-bottom: 0.6rem;
+    transition: var(--transition);
+    outline: none;
+  }
+
+  .newsletter input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(233,69,96,0.1);
+  }
+
+  .newsletter button {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .newsletter button:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+  }
+
+  /* ============ PAGINATION ============ */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+  }
+
+  .pagination a, .pagination span {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: var(--card-bg);
+    color: var(--text-light);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+  }
+
+  .pagination a:hover {
+    background: var(--accent);
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  .pagination span.current {
+    background: var(--accent);
+    color: white;
+  }
+
+  /* ============ ARTICLE PAGE ============ */
+  .article-page {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr var(--sidebar-width);
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .article-header {
+    margin-bottom: 2rem;
+  }
+
+  .article-header .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--text-lighter);
+    margin-bottom: 1.5rem;
+  }
+
+  .article-header .breadcrumb a:hover {
+    color: var(--accent);
+  }
+
+  .article-header .category {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    background: rgba(233,69,96,0.08);
+    color: var(--accent);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .article-header h1 {
+    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.3;
+    color: var(--primary);
+    margin-bottom: 1rem;
+  }
+
+  .article-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--text-lighter);
+    flex-wrap: wrap;
+  }
+
+  .article-meta .author-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .article-meta .author-info img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .article-meta .author-info strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .article-cover {
+    width: 100%;
+    height: 420px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  .article-body {
+    font-size: 1.05rem;
+    line-height: 2;
+    color: var(--text);
+  }
+
+  .article-body p {
+    margin-bottom: 1.5rem;
+  }
+
+  .article-body h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin: 2.5rem 0 1rem;
+    color: var(--primary);
+  }
+
+  .article-body h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 2rem 0 0.8rem;
+    color: var(--primary);
+  }
+
+  .article-body blockquote {
+    border-left: 4px solid var(--accent);
+    padding: 1.2rem 1.5rem;
+    margin: 2rem 0;
+    background: rgba(233,69,96,0.03);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    font-style: italic;
+    color: var(--text-light);
+  }
+
+  .article-body img {
+    border-radius: var(--radius);
+    margin: 1.5rem 0;
+    box-shadow: var(--shadow);
+  }
+
+  .article-body ul, .article-body ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .article-body li {
+    margin-bottom: 0.5rem;
+  }
+
+  .article-body code {
+    background: var(--bg);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  .article-body pre {
+    background: var(--primary);
+    color: #e0e0e0;
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+
+  .article-body pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+  }
+
+  /* Article Tags */
+  .article-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .article-tags a {
+    padding: 0.35rem 0.85rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    background: var(--bg);
+    color: var(--text-light);
+    transition: var(--transition);
+  }
+
+  .article-tags a:hover {
+    background: var(--accent);
+    color: white;
+  }
+
+  /* Share Buttons */
+  .share-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-top: 1.5rem;
+  }
+
+  .share-buttons span {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-light);
+  }
+
+  .share-buttons a {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    color: var(--text-light);
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+
+  .share-buttons a:hover {
+    background: var(--accent);
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  /* Related Posts */
+  .related-posts {
+    margin-top: 3rem;
+  }
+
+  .related-posts h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--primary);
+  }
+
+  .related-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .related-card {
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    cursor: pointer;
+  }
+
+  .related-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-3px);
+  }
+
+  .related-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+  }
+
+  .related-card .info {
+    padding: 1.2rem;
+  }
+
+  .related-card .info h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 0.3rem;
+    transition: var(--transition);
+  }
+
+  .related-card:hover .info h4 {
+    color: var(--accent);
+  }
+
+  .related-card .info .date {
+    font-size: 0.78rem;
+    color: var(--text-lighter);
+  }
+
+  /* Comments */
+  .comments-section {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .comments-section h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--primary);
+  }
+
+  .comment {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .comment:last-of-type {
+    border-bottom: none;
+  }
+
+  .comment img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .comment .comment-body .comment-author {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.1rem;
+  }
+
+  .comment .comment-body .comment-date {
+    font-size: 0.78rem;
+    color: var(--text-lighter);
+    margin-bottom: 0.5rem;
+  }
+
+  .comment .comment-body .comment-text {
+    font-size: 0.92rem;
+    color: var(--text-light);
+    line-height: 1.7;
+  }
+
+  .comment-form {
+    margin-top: 2rem;
+  }
+
+  .comment-form textarea,
+  .comment-form input {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: var(--font);
+    margin-bottom: 0.8rem;
+    transition: var(--transition);
+    outline: none;
+    background: var(--card-bg);
+  }
+
+  .comment-form textarea {
+    height: 120px;
+    resize: vertical;
+  }
+
+  .comment-form textarea:focus,
+  .comment-form input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(233,69,96,0.1);
+  }
+
+  .comment-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+  }
+
+  .comment-form button {
+    padding: 0.85rem 2rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .comment-form button:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+  }
+
+  /* ============ ABOUT PAGE ============ */
+  .about-page {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr var(--sidebar-width);
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .about-hero {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .about-hero .avatar-large {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 1.5rem;
+    border: 4px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+
+  .about-hero h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 0.5rem;
+  }
+
+  .about-hero p {
+    color: var(--text-light);
+    font-size: 1.05rem;
+  }
+
+  .about-content {
+    font-size: 1.05rem;
+    line-height: 2;
+  }
+
+  .about-content p {
+    margin-bottom: 1.5rem;
+    color: var(--text-light);
+  }
+
+  .about-content h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 2.5rem 0 1rem;
+    letter-spacing: -0.3px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  .stat-item {
+    text-align: center;
+    padding: 1.5rem;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+  .stat-item .number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -1px;
+  }
+
+  .stat-item .label {
+    font-size: 0.82rem;
+    color: var(--text-lighter);
+    margin-top: 0.3rem;
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 2rem;
+    margin: 2rem 0;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+  }
+
+  .timeline-item {
+    position: relative;
+    padding-bottom: 2rem;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -2rem;
+    top: 6px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid var(--bg);
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+
+  .timeline-item .year {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+  }
+
+  .timeline-item h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+  }
+
+  .timeline-item p {
+    font-size: 0.9rem;
+    color: var(--text-lighter);
+    margin-bottom: 0;
+  }
+
+  /* Skills */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .skill-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .skill-item .skill-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .skill-item .skill-bar {
+    height: 6px;
+    background: var(--bg);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .skill-item .skill-bar .fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent), #ff6b8a);
+  }
+
+  /* ============ CATEGORY PAGE ============ */
+  .category-page {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr var(--sidebar-width);
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .category-header {
+    margin-bottom: 2rem;
+    padding: 2.5rem;
+    background: linear-gradient(135deg, var(--primary), #16213e);
+    border-radius: var(--radius);
+    color: white;
+  }
+
+  .category-header .breadcrumb {
+    font-size: 0.82rem;
+    opacity: 0.6;
+    margin-bottom: 1rem;
+  }
+
+  .category-header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 0.5rem;
+  }
+
+  .category-header p {
+    opacity: 0.7;
+    font-size: 0.95rem;
+  }
+
+  .category-posts .post-card {
+    margin-bottom: 1.5rem;
+  }
+
+  /* ============ SEARCH MODAL ============ */
+  .search-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 15vh;
+  }
+
+  .search-overlay.active {
+    display: flex;
+  }
+
+  .search-box {
+    background: white;
+    border-radius: var(--radius);
+    padding: 2rem;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: slideDown 0.3s ease;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 1rem 1.2rem;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-family: var(--font);
+    outline: none;
+    transition: var(--transition);
+  }
+
+  .search-box input:focus {
+    border-color: var(--accent);
+  }
+
+  .search-box .search-hint {
+    margin-top: 0.8rem;
+    font-size: 0.82rem;
+    color: var(--text-lighter);
+  }
+
+  .search-box .search-hint kbd {
+    background: var(--bg);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    border: 1px solid var(--border);
+  }
+
+  /* ============ FOOTER ============ */
+  .footer {
+    background: var(--primary);
+    color: rgba(255,255,255,0.7);
+    margin-top: 2rem;
+  }
+
+  .footer-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .footer-brand .logo {
+    color: white;
+    font-size: 1.3rem;
+    margin-bottom: 0.8rem;
+    display: inline-block;
+  }
+
+  .footer-brand p {
+    font-size: 0.85rem;
+    line-height: 1.7;
+    opacity: 0.6;
+  }
+
+  .footer h4 {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    letter-spacing: 0.5px;
+  }
+
+  .footer ul {
+    list-style: none;
+  }
+
+  .footer ul li {
+    margin-bottom: 0.5rem;
+  }
+
+  .footer ul li a {
+    font-size: 0.85rem;
+    opacity: 0.6;
+    transition: var(--transition);
+  }
+
+  .footer ul li a:hover {
+    opacity: 1;
+    color: var(--accent);
+  }
+
+  .footer-bottom {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 1.5rem 2rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    opacity: 0.5;
+  }
+
+  /* ============ BACK TO TOP ============ */
+  .back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(233,69,96,0.4);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: var(--transition);
+    z-index: 50;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(233,69,96,0.5);
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 1024px) {
+    .container,
+    .article-page,
+    .about-page,
+    .category-page {
+      grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+      position: static;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .post-card.featured {
+      grid-template-columns: 1fr;
+    }
+
+    .post-card.featured .thumb {
+      min-height: 240px;
+    }
+
+    .footer-inner {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .nav {
+      display: none;
+      position: absolute;
+      top: 72px;
+      left: 0;
+      right: 0;
+      background: white;
+      flex-direction: column;
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .nav.open {
+      display: flex;
+    }
+
+    .menu-toggle {
+      display: flex;
+    }
+
+    .sidebar {
+      grid-template-columns: 1fr;
+    }
+
+    .related-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .skills-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .footer-inner {
+      grid-template-columns: 1fr;
+    }
+
+    .footer-bottom {
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: center;
+    }
+
+    .article-cover {
+      height: 260px;
+    }
+
+    .comment-form .form-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero h1 {
+      font-size: 1.8rem;
+    }
+
+    .post-card .content {
+      padding: 1.2rem;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="header" id="header">
+  <div class="header-inner">
+    <div class="logo" onclick="showPage('home')">MORN<span>.</span></div>
+    <nav class="nav" id="nav">
+      <a href="#" class="active" data-page="home" onclick="showPage('home')">首页</a>
+      <a href="#" data-page="category" onclick="showPage('category')">分类</a>
+      <a href="#" data-page="article" onclick="showPage('article')">文章</a>
+      <a href="#" data-page="about" onclick="showPage('about')">关于</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:0.5rem;">
+      <button class="search-btn" onclick="toggleSearch()">🔍</button>
+      <button class="menu-toggle" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ SEARCH OVERLAY ============ -->
+<div class="search-overlay" id="searchOverlay" onclick="closeSearch(event)">
+  <div class="search-box" onclick="event.stopPropagation()">
+    <input type="text" placeholder="搜索文章、标签、分类..." autofocus>
+    <div class="search-hint">按 <kbd>ESC</kbd> 关闭搜索</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- ============ PAGE: HOME ============ -->
+<!-- ============================================================ -->
+<div class="page active" id="page-home">
+
+  <section class="hero">
+    <h1>探索 <em>设计与生活</em> 的交汇处</h1>
+    <p>分享关于前端开发、UI 设计、创意灵感以及生活美学的思考与感悟。</p>
+    <div class="hero-tags">
+      <span onclick="showPage('category')">前端开发</span>
+      <span onclick="showPage('category')">UI 设计</span>
+      <span onclick="showPage('category')">生活美学</span>
+      <span onclick="showPage('category')">摄影</span>
+      <span onclick="showPage('category')">随笔</span>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="posts">
+
+      <!-- Featured Post -->
+      <article class="post-card featured" onclick="showPage('article')">
+        <div class="thumb-wrapper">
+          <img class="thumb" src="https://picsum.photos/600/400?random=1" alt="Featured Post">
+          <span class="category-badge">精选</span>
+        </div>
+        <div class="content">
+          <div class="meta">
+            <span class="author">
+              <img src="https://picsum.photos/48/48?random=10" alt="avatar">
+              林小溪
+            </span>
+            <span>2024年12月15日</span>
+            <span>12 分钟阅读</span>
+          </div>
+          <h2>2024 年前端开发趋势：从 React Server Components 到 AI 驱动开发</h2>
+          <p class="excerpt">回顾 2024 年前端领域的重大变化，探讨 Server Components、边缘计算、AI 辅助编程等技术如何重塑我们的工作方式，以及未来的发展方向。</p>
+          <span class="read-more">阅读全文</span>
+        </div>
+      </article>
+
+      <!-- Post 2 -->
+      <article class="post-card" onclick="showPage('article')">
+        <div class="thumb-wrapper">
+          <img class="thumb" src="https://picsum.photos/800/400?random=2" alt="Post">
+          <span class="category-badge">设计</span>
+        </div>
+        <div class="content">
+          <div class="meta">
+            <span class="author">
+              <img src="https://picsum.photos/48/48?random=10" alt="avatar">
+              林小溪
+            </span>
+            <span>2024年12月10日</span>
+            <span>8 分钟阅读</span>
+          </div>
+          <h2>极简主义设计哲学：少即是多的艺术实践</h2>
+          <p class="excerpt">探讨极简主义在设计中的应用，如何通过留白、色彩对比和排版层次创造出令人惊叹的视觉体验，以及如何在项目中实践这一理念。</p>
+          <span class="read-more">阅读全文</span>
+        </div>
+      </article>
+
+      <!-- Post 3 -->
+      <article class="post-card" onclick="showPage('article')">
+        <div class="thumb-wrapper">
+          <img class="thumb" src="https://picsum.photos/800/400?random=3" alt="Post">
+          <span class="category-badge">摄影</span>
+        </div>
+        <div class="content">
+          <div class="meta">
+            <span class="author">
+              <img src="https://picsum.photos/48/48?random=10" alt="avatar">
+              林小溪
+            </span>
+            <span>2024年12月5日</span>
+            <span>6 分钟阅读</span>
+          </div>
+          <h2>城市光影：用镜头捕捉日常生活中的诗意瞬间</h2>
+          <p class="excerpt">在快节奏的都市生活中，学会用慢下来的眼光观察周围的世界。分享一组城市街头摄影作品，以及背后的拍摄故事与技巧心得。</p>
+          <span class="read-more">阅读全文</span>
+        </div>
+      </article>
+
+      <!-- Post 4 -->
+      <article class="post-card" onclick="showPage('article')">
+        <div class="thumb-wrapper">
+          <img class="thumb" src="https://picsum.photos/800/400?random=4" alt="Post">
+          <span class="category-badge">开发</span>
+        </div>
+        <div class="content">
+          <div class="meta">
+            <span class="author">
+              <img src="https://picsum.photos/48/48?random=10" alt="avatar">
+              林小溪
+            </span>
+            <span>2024年11月28日</span>
+            <span>15 分钟阅读</span>
+          </div>
+          <h2>CSS 容器查询完全指南：告别媒体查询的局限</h2>
+          <p class="excerpt">容器查询是 CSS 近年来最令人兴奋的特性之一。本文将深入讲解 Container Queries 的使用方法、最佳实践以及实际项目中的应用案例。</p>
+          <span class="read-more">阅读全文</span>
+        </div>
+      </article>
+
+      <!-- Post 5 -->
+      <article class="post-card" onclick="showPage('article')">
+        <div class="thumb-wrapper">
+          <img class="thumb" src="https://picsum.photos/800/400?random=5" alt="Post">
+          <span class="category-badge">生活</span>
+        </div>
+        <div class="content">
+          <div class="meta">
+            <span class="author">
+              <img src="https://picsum.photos/48/48?random=10" alt="avatar">
+              林小溪
+            </span>
+            <span>2024年11月20日</span>
+            <span>5 分钟阅读</span>
+          </div>
+          <h2>数字游民生活：在巴厘岛远程工作的三个月</h2>
+          <p class="excerpt">离开熟悉的办公室，带着笔记本电脑来到热带岛屿。分享这段远程工作旅程中的收获、挑战以及对工作方式的新思考。</p>
+          <span class="read-more">阅读全文</span>
+        </div>
+      </article>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <span class="current">1</span>
+        <a href="#">2</a>
+        <a href="#">3</a>
+        <a href="#">4</a>
+        <a href="#">→</a>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+      <!-- Author Widget -->
+      <div class="widget author-widget">
+        <img class="avatar" src="https://picsum.photos/160/160?random=10" alt="avatar">
+        <div class="name">林小溪</div>
+        <div class="bio">前端开发者 / UI 设计师 / 摄影爱好者</div>
+        <div class="social-links">
+          <a href="#" title="GitHub">GH</a>
+          <a href="#" title="Twitter">TW</a>
+          <a href="#" title="Dribbble">DR</a>
+          <a href="#" title="Email">✉</a>
+        </div>
+      </div>
+
+      <!-- Newsletter Widget -->
+      <div class="widget newsletter">
+        <h3>订阅更新</h3>
+        <p>每周精选文章直达邮箱，不错过任何精彩内容。</p>
+        <input type="email" placeholder="your@email.com">
+        <button>立即订阅</button>
+      </div>
+
+      <!-- Categories Widget -->
+      <div class="widget">
+        <h3>文章分类</h3>
+        <ul class="cat-list">
+          <li><a href="#" onclick="showPage('category')">前端开发</a> <span class="count">24</span></li>
+          <li><a href="#" onclick="showPage('category')">UI 设计</a> <span class="count">18</span></li>
+          <li><a href="#" onclick="showPage('category')">生活美学</a> <span class="count">12</span></li>
+          <li><a href="#" onclick="showPage('category')">摄影</a> <span class="count">9</span></li>
+          <li><a href="#" onclick="showPage('category')">随笔杂谈</a> <span class="count">15</span></li>
+        </ul>
+      </div>
+
+      <!-- Popular Posts Widget -->
+      <div class="widget">
+        <h3>热门文章</h3>
+        <div class="popular-post" onclick="showPage('article')">
+          <span class="num">01</span>
+          <div class="info">
+            <h4>Vue 3.4 新特性全面解读与实战指南</h4>
+            <span class="date">2024年11月15日</span>
+          </div>
+        </div>
+        <div class="popular-post" onclick="showPage('article')">
+          <span class="num">02</span>
+          <div class="info">
+            <h4>如何建立个人设计系统：从理论到实践</h4>
+            <span class="date">2024年10月28日</span>
+          </div>
+        </div>
+        <div class="popular-post" onclick="showPage('article')">
+          <span class="num">03</span>
+          <div class="info">
+            <h4>TypeScript 高级类型编程技巧合集</h4>
+            <span class="date">2024年10月12日</span>
+          </div>
+        </div>
+        <div class="popular-post" onclick="showPage('article')">
+          <span class="num">04</span>
+          <div class="info">
+            <h4>我的极简桌面搭建：效率与美学的平衡</h4>
+            <span class="date">2024年9月30日</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tag Cloud Widget -->
+      <div class="widget">
+        <h3>标签云</h3>
+        <div class="tag-cloud">
+          <a href="#">React</a>
+          <a href="#">Vue</a>
+          <a href="#">TypeScript</a>
+          <a href="#">CSS</a>
+          <a href="#">设计系统</a>
+          <a href="#">Figma</a>
+          <a href="#">摄影</a>
+          <a href="#">旅行</a>
+          <a href="#">效率</a>
+          <a href="#">AI</a>
+          <a href="#">Node.js</a>
+          <a href="#">Vite</a>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- ============ PAGE: ARTICLE ============ -->
+<!-- ============================================================ -->
+<div class="page" id="page-article">
+  <div class="article-page">
+    <main>
+      <div class="article-header">
+        <div class="breadcrumb">
+          <a href="#" onclick="showPage('home')">首页</a>
+          <span>/</span>
+          <a href="#" onclick="showPage('category')">前端开发</a>
+          <span>/</span>
+          <span>正文</span>
+        </div>
+        <span class="category">前端开发</span>
+        <h1>2024 年前端开发趋势：从 React Server Components 到 AI 驱动开发</h1>
+        <div class="article-meta">
+          <div class="author-info">
+            <img src="https://picsum.photos/64/64?random=10" alt="avatar">
+            <div>
+              <strong>林小溪</strong><br>
+              <span>发布于 2024年12月15日</span>
+            </div>
+          </div>
+          <span>📖 12 分钟阅读</span>
+          <span>👁 3,280 次浏览</span>
+          <span>💬 28 条评论</span>
+        </div>
+      </div>
+
+      <img class="article-cover" src="https://picsum.photos/900/500?random=1" alt="cover">
+
+      <div class="article-body">
+        <p>2024 年对于前端开发领域来说是充满变革的一年。从 React Server Components 的成熟应用到 AI 辅助编程工具的爆发式增长，前端开发者面临着前所未有的机遇与挑战。在这篇文章中，我将深入探讨这些趋势，并分享一些个人的思考与实践。</p>
+
+        <h2>React Server Components 的全面落地</h2>
+        <p>React Server Components（RSC）无疑是今年最受关注的技术之一。它从根本上改变了我们构建 React 应用的方式，允许组件在服务端运行，减少了发送到客户端的 JavaScript 量，从而显著提升了应用的性能。</p>
+
+        <blockquote>
+          "Server Components 不是关于在服务端渲染 HTML，而是关于在服务端运行组件逻辑，只将必要的状态和 UI 描述发送到客户端。" — React 核心团队
+        </blockquote>
+
+        <p>在实际项目中，我们已经将 RSC 应用于多个生产环境，效果显著。首屏加载时间平均减少了 40%，交互延迟降低了 60%。这不仅提升了用户体验，也降低了服务器的带宽成本。</p>
+
+        <img src="https://picsum.photos/800/400?random=20" alt="article image">
+
+        <h2>AI 驱动的开发工作流</h2>
+        <p>如果说 RSC 改变了架构层面，那么 AI 工具则彻底改变了我们的日常开发体验。从 GitHub Copilot 到 Cursor，AI 辅助编程已经从玩具变成了真正生产力工具。</p>
+
+        <p>在我们的团队中，AI 工具已经深度集成到了开发流程中：</p>
+        <ul>
+          <li><strong>代码生成</strong>：AI 可以快速生成样板代码和常见模式的实现</li>
+          <li><strong>代码审查</strong>：AI 辅助发现潜在的性能问题和安全漏洞</li>
+          <li><strong>文档生成</strong>：自动从代码中提取注释并生成 API 文档</li>
+          <li><strong>调试助手</strong>：快速定位错误根因并提供修复建议</li>
+        </ul>
+
+        <h2>边缘计算的崛起</h2>
+        <p>随着 Vercel Edge Functions、Cloudflare Workers 等平台的成熟，边缘计算正在成为前端架构中不可或缺的一部分。将计算推向离用户更近的边缘节点，可以显著降低延迟，提供更流畅的用户体验。</p>
+
+        <pre><code>// 一个简单的 Edge Function 示例
+export default async function handler(request) {
+  const url = new URL(request.url);
+  const country = request.headers.get('cf-ipcountry');
+
+  if (country === 'CN') {
+    return Response.redirect('https://cn.example.com');
+  }
+
+  return new Response('Hello, World!');
+}</code></pre>
+
+        <h3>性能优化的新思路</h3>
+        <p>除了上述技术趋势，2024 年在性能优化方面也有许多新的实践方式。View Transitions API 让页面过渡更加流畅，Priority Hints 帮助浏览器更好地理解资源加载的优先级，而 speculation rules 则让预渲染变得更加智能。</p>
+
+        <p>这些技术的共同点是：它们都在尝试让浏览器更好地理解开发者的意图，从而做出更优的决策。作为开发者，我们需要做的不是掌握所有 API，而是理解其背后的设计哲学，在合适的场景选择合适的方案。</p>
+
+        <img src="https://picsum.photos/800/400?random=21" alt="article image">
+
+        <h2>展望未来</h2>
+        <p>站在 2024 年末回望，前端开发的边界正在不断扩展。我们不再仅仅是"写页面的人"，而是用户体验的设计者、性能优化的工程师、甚至是 AI 协作的引导者。</p>
+        <p>未来的前端开发将更加智能化、组件化、全栈化。保持学习的态度，拥抱变化，同时坚守对用户体验的执着追求，这才是我们在这个快速变化的行业中立足的根本。</p>
+      </div>
+
+      <!-- Tags -->
+      <div class="article-tags">
+        <a href="#">React</a>
+        <a href="#">Server Components</a>
+        <a href="#">AI 编程</a>
+        <a href="#">边缘计算</a>
+        <a href="#">性能优化</a>
+        <a href="#">2024 趋势</a>
+      </div>
+
+      <!-- Share -->
+      <div class="share-buttons">
+        <span>分享文章：</span>
+        <a href="#" title="Twitter">𝕏</a>
+        <a href="#" title="微信">微</a>
+        <a href="#" title="微博">博</a>
+        <a href="#" title="复制链接">🔗</a>
+      </div>
+
+      <!-- Related Posts -->
+      <div class="related-posts">
+        <h3>相关文章</h3>
+        <div class="related-grid">
+          <div class="related-card" onclick="showPage('article')">
+            <img src="https://picsum.photos/400/250?random=30" alt="related">
+            <div class="info">
+              <h4>Vue 3.4 新特性全面解读与实战指南</h4>
+              <span class="date">2024年11月15日</span>
+            </div>
+          </div>
+          <div class="related-card" onclick="showPage('article')">
+            <img src="https://picsum.photos/400/250?random=31" alt="related">
+            <div class="info">
+              <h4>TypeScript 5.3 类型体操进阶教程</h4>
+              <span class="date">2024年11月8日</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comments -->
+      <div class="comments-section">
+        <h3>评论 (28)</h3>
+
+        <div class="comment">
+          <img src="https://picsum.photos/88/88?random=40" alt="user">
+          <div class="comment-body">
+            <div class="comment-author">张明远</div>
+            <div class="comment-date">2024年12月16日 09:32</div>
+            <div class="comment-text">写得非常好！RSC 确实改变了我们的开发方式，不过学习曲线还是比较陡峭的，期待更多实战案例分享。</div>
+          </div>
+        </div>
+
+        <div class="comment">
+          <img src="https://picsum.photos/88/88?random=41" alt="user">
+          <div class="comment-body">
+            <div class="comment-author">李思琪</div>
+            <div class="comment-date">2024年12月16日 11:15</div>
+            <div class="comment-text">AI 辅助编程这部分深有同感，现在写代码的效率确实提升了很多，但也要注意不能完全依赖 AI，理解底层原理同样重要。</div>
+          </div>
+        </div>
+
+        <div class="comment">
+          <img src="https://picsum.photos/88/88?random=42" alt="user">
+          <div class="comment-body">
+            <div class="comment-author">王浩然</div>
+            <div class="comment-date">2024年12月16日 14:28</div>
+            <div class="comment-text">边缘计算那段讲得很透彻，我们最近也在考虑迁移到 Vercel Edge Functions，这篇文章给了我们很多信心！</div>
+          </div>
+        </div>
+
+        <!-- Comment Form -->
+        <div class="comment-form">
+          <h3 style="margin-bottom:1.2rem;">发表评论</h3>
+          <div class="form-row">
+            <input type="text" placeholder="你的昵称">
+            <input type="email" placeholder="你的邮箱">
+          </div>
+          <textarea placeholder="写下你的想法..."></textarea>
+          <button>发表评论</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="widget author-widget">
+        <img class="avatar" src="https://picsum.photos/160/160?random=10" alt="avatar">
+        <div class="name">林小溪</div>
+        <div class="bio">前端开发者 / UI 设计师 / 摄影爱好者</div>
+        <div class="social-links">
+          <a href="#">GH</a>
+          <a href="#">TW</a>
+          <a href="#">DR</a>
+          <a href="#">✉</a>
+        </div>
+      </div>
+
+      <div class="widget newsletter">
+        <h3>订阅更新</h3>
+        <p>每周精选文章直达邮箱，不错过任何精彩内容。</p>
+        <input type="email" placeholder="your@email.com">
+        <button>立即订阅</button>
+      </div>
+
+      <div class="widget">
+        <h3>热门文章</h3>
+        <div class="popular-post" onclick="showPage('article')">
+          <span class="num">01</span>
+          <div class="info">
+            <h4>Vue 3.4 新特性全面解读与实战指南</h4>
+            <span class="date">2024年11月15日</span>
+          </div>
+        </div>
+        <div class="popular-post" onclick="showPage('article')">
+          <span class="num">02</span>
+          <div class="info">
+            <h4>如何建立个人设计系统：从理论到实践</h4>
+            <span class="date">2024年10月28日</span>
+          </div>
+        </div>
+        <div class="popular-post" onclick="showPage('article')">
+          <span class="num">03</span>
+          <div class="info">
+            <h4>TypeScript 高级类型编程技巧合集</h4>
+            <span class="date">2024年10月12日</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="widget">
+        <h3>标签云</h3>
+        <div class="tag-cloud">
+          <a href="#">React</a>
+          <a href="#">Vue</a>
+          <a href="#">TypeScript</a>
+          <a href="#">CSS</a>
+          <a href="#">设计系统</a>
+          <a href="#">AI</a>
+          <a href="#">Node.js</a>
+          <a href="#">Vite</a>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- ============ PAGE: CATEGORY ============ -->
+<!-- ============================================================ -->
+<div class="page" id="page-category">
+  <div class="category-page">
+    <div class="category-posts">
+      <div class="category-header">
+        <div class="breadcrumb">
+          <a href="#" onclick="showPage('home')">首页</a> / 前端开发
+        </div>
+        <h1>前端开发</h1>
+        <p>共 24 篇文章 · 关注 Web 技术、前端框架、工程化实践与性能优化</p>
+      </div>
+
+      <article class="post-card" onclick="showPage('article')">
+        <div class="thumb-wrapper">
+          <img class="thumb" src="https://picsum.photos/800/400?random=50" alt="Post">
+          <span class="category-badge">React</span>
+        </div>
+        <div class="content">
+          <div class="meta">
+            <span>2024年12月15日</span>
+            <span>12 分钟阅读</span>
+          </div>
+          <h2>2024 年前端开发趋势：从 React Server Components 到 AI 驱动开发</h2>
+          <p class="excerpt">回顾 2024 年前端领域的重大变化，探讨 Server Components、边缘计算、AI 辅助编程等技术如何重塑我们的工作方式。</p>
+          <span class="read-more">阅读全文</span>
+        </div>
+      </article>
+
+      <article class="post-card" onclick="showPage('article')">
+        <div class="thumb-wrapper">
+          <img class="thumb" src="https://picsum.photos/800/400?random=51" alt="Post">
+          <span class="category-badge">CSS</span>
+        </div>
+        <div class="content">
+          <div class="meta">
+            <span>2024年11月28日</span>
+            <span>15 分钟阅读</span>
+          </div>
+          <h2>CSS 容器查询完全指南：告别媒体查询的局限</h2>
+          <p class="excerpt">容器查询是 CSS 近年来最令人兴奋的特性之一。本文将深入讲解 Container Queries 的使用方法、最佳实践以及实际项目中的应用案例。</p>
+          <span class="read-more">阅读全文</span>
+        </div>
+      </article>
+
+      <article class="post-card" onclick="showPage('article')">
+        <div class="thumb-wrapper">
+          <img class="thumb" src="https://picsum.photos/800/400?random=52" alt="Post">
+          <span class="category-badge">Vue</span>
+        </div>
+        <div class="content">
+          <div class="meta">
+            <span>2024年11月15日</span>
+            <span>10 分钟阅读</span>
+          </div>
+          <h2>Vue 3.4 新特性全面解读与实战指南</h2>
+          <p class="excerpt">Vue 3.4 带来了许多令人兴奋的新特性，包括改进的响应式系统、更好的 TypeScript 支持和新的编译优化策略。</p>
+          <span class="read-more">阅读全文</span>
+        </div>
+      </article>
+
+      <article class="post-card" onclick="showPage('article')">
+        <div class="thumb-wrapper">
+          <img class="thumb" src="https://picsum.photos/800/400?random=53" alt="Post">
+          <span class="category-badge">TypeScript</span>
+        </div>
+        <div class="content">
+          <div class="meta">
+            <span>2024年11月8日</span>
+            <span>18 分钟阅读</span>
+          </div>
+          <h2>TypeScript 5.3 类型体操进阶教程</h2>
+          <p class="excerpt">深入探讨 TypeScript 的高级类型系统，包括条件类型、模板字面量类型、递归类型等高级特性的实战应用。</p>
+          <span class="read-more">阅读全文</span>
+        </div>
+      </article>
+
+      <article class="post-card" onclick="showPage('article')">
+        <div class="thumb-wrapper">
+          <img class="thumb" src="https://picsum.photos/800/400?random=54" alt="Post">
+          <span class="category-badge">工程化</span>
+        </div>
+        <div class="content">
+          <div class="meta">
+            <span>2024年10月22日</span>
+            <span>8 分钟阅读</span>
+          </div>
+          <h2>从 Vite 到 Turbopack：前端构建工具的演进之路</h2>
+          <p class="excerpt">对比分析主流前端构建工具的性能差异，探讨如何根据项目规模和技术栈选择合适的构建方案。</p>
+          <span class="read-more">阅读全文</span>
+        </div>
+      </article>
+
+      <div class="pagination">
+        <span class="current">1</span>
+        <a href="#">2</a>
+        <a href="#">3</a>
+        <a href="#">4</a>
+        <a href="#">5</a>
+        <a href="#">→</a>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="widget">
+        <h3>文章分类</h3>
+        <ul class="cat-list">
+          <li><a href="#">前端开发</a> <span class="count">24</span></li>
+          <li><a href="#">UI 设计</a> <span class="count">18</span></li>
+          <li><a href="#">生活美学</a> <span class="count">12</span></li>
+          <li><a href="#">摄影</a> <span class="count">9</span></li>
+          <li><a href="#">随笔杂谈</a> <span class="count">15</span></li>
+        </ul>
+      </div>
+
+      <div class="widget newsletter">
+        <h3>订阅更新</h3>
+        <p>每周精选文章直达邮箱，不错过任何精彩内容。</p>
+        <input type="email" placeholder="your@email.com">
+        <button>立即订阅</button>
+      </div>
+
+      <div class="widget">
+        <h3>标签云</h3>
+        <div class="tag-cloud">
+          <a href="#">React</a>
+          <a href="#">Vue</a>
+          <a href="#">TypeScript</a>
+          <a href="#">CSS</a>
+          <a href="#">Vite</a>
+          <a href="#">工程化</a>
+          <a href="#">AI</a>
+          <a href="#">Node.js</a>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- ============ PAGE: ABOUT ============ -->
+<!-- ============================================================ -->
+<div class="page" id="page-about">
+  <div class="about-page">
+    <main>
+      <div class="about-hero">
+        <img class="avatar-large" src="https://picsum.photos/240/240?random=10" alt="avatar">
+        <h1>你好，我是林小溪 👋</h1>
+        <p>前端开发者 · UI 设计师 · 摄影爱好者 · 终身学习者</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="number">78</div>
+          <div class="label">篇文章</div>
+        </div>
+        <div class="stat-item">
+          <div class="number">12K</div>
+          <div class="label">总阅读</div>
+        </div>
+        <div class="stat-item">
+          <div class="number">860</div>
+          <div class="label">订阅者</div>
+        </div>
+      </div>
+
+      <div class="about-content">
+        <p>我是一名热爱技术与设计的前端开发者，目前居住在上海。在过去的 6 年里，我一直专注于 Web 前端开发，致力于创造优雅、高效、用户友好的数字体验。</p>
+
+        <p>这个博客是我的个人空间，记录我在学习、工作和生活中的思考与感悟。我相信好的内容值得被认真对待，所以每一篇文章我都会反复打磨，力求给读者带来价值。</p>
+
+        <h2>🛠 专业技能</h2>
+        <div class="skills-grid">
+          <div class="skill-item">
+            <div class="skill-header"><span>JavaScript / TypeScript</span><span>95%</span></div>
+            <div class="skill-bar"><div class="fill" style="width:95%"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-header"><span>React / Vue</span><span>92%</span></div>
+            <div class="skill-bar"><div class="fill" style="width:92%"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-header"><span>CSS / Tailwind</span><span>90%</span></div>
+            <div class="skill-bar"><div class="fill" style="width:90%"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-header"><span>UI/UX 设计</span><span>85%</span></div>
+            <div class="skill-bar"><div class="fill" style="width:85%"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-header"><span>Node.js</span><span>80%</span></div>
+            <div class="skill-bar"><div class="fill" style="width:80%"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-header"><span>摄影</span><span>75%</span></div>
+            <div class="skill-bar"><div class="fill" style="width:75%"></div></div>
+          </div>
+        </div>
+
+        <h2>📍 成长轨迹</h2>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="year">2024</div>
+            <h4>技术博客升级</h4>
+            <p>博客月阅读量突破 5000，成为技术社区活跃创作者</p>
+          </div>
+          <div class="timeline-item">
+            <div class="year">2022</div>
+            <h4>加入某知名科技公司</h4>
+            <p>担任高级前端工程师，负责核心产品的前端架构设计</p>
+          </div>
+          <div class="timeline-item">
+            <div class="year">2020</div>
+            <h4>开始技术写作</h4>
+            <p>在掘金、知乎等平台发表技术文章，积累第一批读者</p>
+          </div>
+          <div class="timeline-item">
+            <div class="year">2018</div>
+            <h4>大学毕业，入行前端</h4>
+            <p>计算机科学学士，毕业后加入创业团队，开始前端开发之旅</p>
+          </div>
+        </div>
+
+        <h2>💌 联系我</h2>
+        <p>如果你对我的文章有任何想法，或者有合作意向，欢迎通过以下方式联系我：</p>
+        <p>📧 <strong>Email:</strong> hello@linxiaoxi.com<br>
+           🐦 <strong>Twitter:</strong> @linxiaoxi_dev<br>
+           💻 <strong>GitHub:</strong> github.com/linxiaoxi</p>
+      </div>
+    </main>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="widget author-widget">
+        <img class="avatar" src="https://picsum.photos/160/160?random=10" alt="avatar">
+        <div class="name">林小溪</div>
+        <div class="bio">前端开发者 / UI 设计师 / 摄影爱好者</div>
+        <div class="social-links">
+          <a href="#">GH</a>
+          <a href="#">TW</a>
+          <a href="#">DR</a>
+          <a href="#">✉</a>
+        </div>
+      </div>
+
+      <div class="widget">
+        <h3>文章分类</h3>
+        <ul class="cat-list">
+          <li><a href="#" onclick="showPage('category')">前端开发</a> <span class="count">24</span></li>
+          <li><a href="#">UI 设计</a> <span class="count">18</span></li>
+          <li><a href="#">生活美学</a> <span class="count">12</span></li>
+          <li><a href="#">摄影</a> <span class="count">9</span></li>
+          <li><a href="#">随笔杂谈</a> <span class="count">15</span></li>
+        </ul>
+      </div>
+
+      <div class="widget">
+        <h3>热门文章</h3>
+        <div class="popular-post" onclick="showPage('article')">
+          <span class="num">01</span>
+          <div class="info">
+            <h4>Vue 3.4 新特性全面解读与实战指南</h4>
+            <span class="date">2024年11月15日</span>
+          </div>
+        </div>
+        <div class="popular-post" onclick="showPage('article')">
+          <span class="num">02</span>
+          <div class="info">
+            <h4>如何建立个人设计系统：从理论到实践</h4>
+            <span class="date">2024年10月28日</span>
+          </div>
+        </div>
+        <div class="popular-post" onclick="showPage('article')">
+          <span class="num">03</span>
+          <div class="info">
+            <h4>TypeScript 高级类型编程技巧合集</h4>
+            <span class="date">2024年10月12日</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="widget newsletter">
+        <h3>订阅更新</h3>
+        <p>每周精选文章直达邮箱，不错过任何精彩内容。</p>
+        <input type="email" placeholder="your@email.com">
+        <button>立即订阅</button>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">MORN<span>.</span></div>
+      <p>一个关注前端技术、设计美学与生活品质的个人博客。<br>用文字记录成长，用代码改变世界。</p>
+    </div>
+    <div>
+      <h4>导航</h4>
+      <ul>
+        <li><a href="#" onclick="showPage('home')">首页</a></li>
+        <li><a href="#" onclick="showPage('category')">分类</a></li>
+        <li><a href="#" onclick="showPage('article')">文章</a></li>
+        <li><a href="#" onclick="showPage('about')">关于</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>分类</h4>
+      <ul>
+        <li><a href="#">前端开发</a></li>
+        <li><a href="#">UI 设计</a></li>
+        <li><a href="#">生活美学</a></li>
+        <li><a href="#">摄影</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>更多</h4>
+      <ul>
+        <li><a href="#">友情链接</a></li>
+        <li><a href="#">站点地图</a></li>
+        <li><a href="#">隐私政策</a></li>
+        <li><a href="#">RSS 订阅</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2024 MORNING. All rights reserved.</span>
+    <span>Powered with ❤ by WordPress</span>
+  </div>
+</footer>
+
+<!-- Back to Top -->
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+  // ============ PAGE NAVIGATION ============
+  function showPage(pageId) {
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    // Show target page
+    const target = document.getElementById('page-' + pageId);
+    if (target) target.classList.add('active');
+
+    // Update nav active state
+    document.querySelectorAll('.nav a').forEach(a => {
+      a.classList.remove('active');
+      if (a.dataset.page === pageId) a.classList.add('active');
+    });
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Close mobile menu
+    document.getElementById('nav').classList.remove('open');
+  }
+
+  // ============ MOBILE MENU ============
+  function toggleMenu() {
+    document.getElementById('nav').classList.toggle('open');
+  }
+
+  // ============ SEARCH ============
+  function toggleSearch() {
+    document.getElementById('searchOverlay').classList.add('active');
+    setTimeout(() => {
+      document.querySelector('.search-box input').focus();
+    }, 100);
+  }
+
+  function closeSearch(e) {
+    if (e.target === document.getElementById('searchOverlay')) {
+      document.getElementById('searchOverlay').classList.remove('active');
+    }
+  }
+
+  // ESC to close search
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.getElementById('searchOverlay').classList.remove('active');
+    }
+  });
+
+  // ============ HEADER SCROLL EFFECT ============
+  let lastScroll = 0;
+  window.addEventListener('scroll', () => {
+    const header = document.getElementById('header');
+    const backToTop = document.getElementById('backToTop');
+
+    // Header shadow
+    if (window.scrollY > 10) {
+      header.classList.add('scrolled');
+    } else {
+      header.classList.remove('scrolled');
+    }
+
+    // Back to top button
+    if (window.scrollY > 400) {
+      backToTop.classList.add('visible');
+    } else {
+      backToTop.classList.remove('visible');
+    }
+
+    lastScroll = window.scrollY;
+  });
+
+  // ============ LAZY IMAGE EFFECT (simple) ============
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.post-card, .widget').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+  });
+
+  // Re-trigger for active page
+  function triggerAnimations() {
+    setTimeout(() => {
+      document.querySelectorAll('.page.active .post-card, .page.active .widget').forEach(el => {
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      });
+    }, 100);
+  }
+
+  // Override showPage to trigger animations
+  const originalShowPage = showPage;
+  showPage = function(pageId) {
+    originalShowPage(pageId);
+    triggerAnimations();
+  };
+
+  // Initial animation
+  triggerAnimations();
+</script>
+
+</body>
+</html>
