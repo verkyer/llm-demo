@@ -47,5 +47,18 @@
     "rel": "swift-score",
     "hasIndex": true,
     "children": []
+  },
+  {
+    "name": "wordpress-theme",
+    "rel": "wordpress-theme",
+    "hasIndex": false,
+    "children": [
+      {
+        "name": "qwen3.6-plus",
+        "rel": "wordpress-theme/qwen3.6-plus",
+        "hasIndex": true,
+        "children": []
+      }
+    ]
   }
 ]
