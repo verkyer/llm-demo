@@ -441,41 +441,7 @@
     </div>
 
     <script>
-      const PROJECTS = [
-        { name: 'demo', rel: 'demo', hasIndex: true, children: [] },
-        { name: 'swift-score', rel: 'swift-score', hasIndex: true, children: [] },
-        {
-          name: 'one-pages',
-          rel: 'one-pages',
-          hasIndex: false,
-          children: [
-            {
-              name: 'glm5',
-              rel: 'one-pages/glm5',
-              hasIndex: true,
-              children: [],
-            },
-            {
-              name: 'kimi-k2.5',
-              rel: 'one-pages/kimi-k2.5',
-              hasIndex: true,
-              children: [],
-            },
-            {
-              name: 'minimax-m2.5',
-              rel: 'one-pages/minimax-m2.5',
-              hasIndex: true,
-              children: [],
-            },
-            {
-              name: 'qwen3.5-plus',
-              rel: 'one-pages/qwen3.5-plus',
-              hasIndex: true,
-              children: [],
-            },
-          ],
-        },
-      ]
+      let PROJECTS = []
 
       function escapeHtml(s) {
         return String(s)
@@ -563,7 +529,20 @@
       const preferredDark = window.matchMedia('(prefers-color-scheme: dark)').matches
       setTheme(storedTheme || (preferredDark ? 'dark' : 'light'))
 
-      treeContainer.innerHTML = renderTree(PROJECTS)
+      const loadProjects = async () => {
+        try {
+          const res = await fetch('./projects.json')
+          if (!res.ok) throw new Error('Failed to load projects')
+          PROJECTS = await res.json()
+          treeContainer.innerHTML = renderTree(PROJECTS)
+          hydratePageTitles()
+        } catch (error) {
+          treeContainer.innerHTML = '<p class="no-results" style="display:block">加载项目列表失败</p>'
+          console.error('Error loading projects:', error)
+        }
+      }
+
+      loadProjects()
 
       const treeItems = () => document.querySelectorAll('.tree-item')
       const leafItems = () => document.querySelectorAll('.tree-item.leaf')
@@ -672,7 +651,6 @@
       })
 
       updateClearVisibility()
-      hydratePageTitles()
     </script>
   </body>
 </html>

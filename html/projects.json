@@ -1,0 +1,51 @@
+[
+  {
+    "name": "demo",
+    "rel": "demo",
+    "hasIndex": true,
+    "children": []
+  },
+  {
+    "name": "one-pages",
+    "rel": "one-pages",
+    "hasIndex": false,
+    "children": [
+      {
+        "name": "claude-4.6-opus",
+        "rel": "one-pages/claude-4.6-opus",
+        "hasIndex": true,
+        "children": []
+      },
+      {
+        "name": "glm5",
+        "rel": "one-pages/glm5",
+        "hasIndex": true,
+        "children": []
+      },
+      {
+        "name": "kimi-k2.5",
+        "rel": "one-pages/kimi-k2.5",
+        "hasIndex": true,
+        "children": []
+      },
+      {
+        "name": "minimax-m2.5",
+        "rel": "one-pages/minimax-m2.5",
+        "hasIndex": true,
+        "children": []
+      },
+      {
+        "name": "qwen3.5-plus",
+        "rel": "one-pages/qwen3.5-plus",
+        "hasIndex": true,
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "swift-score",
+    "rel": "swift-score",
+    "hasIndex": true,
+    "children": []
+  }
+]
