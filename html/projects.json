@@ -1,5 +1,12 @@
 [
   {
+    "name": "blog-theme",
+    "rel": "blog-theme",
+    "hasIndex": true,
+    "indexTitle": "Minimalist Blog - 优雅简约双栏博客",
+    "children": []
+  },
+  {
     "name": "demo",
     "rel": "demo",
     "hasIndex": true,
