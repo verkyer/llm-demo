@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimalist Blog - 优雅简约双栏博客</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome 图标库 CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts 衬线与无衬线字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans SC', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 强制无大圆角与无超大字号规则 */
+        body {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* 严谨精致的直角偏圆角(4px) */
+        .custom-rounded {
+            border-radius: 4px !important;
+        }
+
+        /* 隐藏滚动条但保留功能 (选填，这里做精细化美化) */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
+
+        /* 灯箱平滑过渡 */
+        #lightbox {
+            transition: opacity 0.25s ease-out;
+        }
+        
+        /* 优雅的阅读进度条 */
+        #readingProgress {
+            transform-origin: 0% 50%;
+        }
+    </style>
+</head>
+<body class="bg-[#fcfbf9] text-[#1e293b] dark:bg-[#0f1115] dark:text-[#cbd5e1] transition-colors duration-200 min-h-screen flex flex-col">
+
+    <!-- 顶部进度条 -->
+    <div id="readingProgress" class="fixed top-0 left-0 h-[2px] bg-indigo-600 dark:bg-indigo-400 w-full scale-x-0 z-50 transition-transform duration-75"></div>
+
+    <!-- 顶部导航栏 (Logo + 菜单) -->
+    <header class="sticky top-0 z-40 bg-[#fcfbf9]/90 dark:bg-[#0f1115]/90 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/60 transition-colors">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <!-- Logo -->
+            <a href="#" onclick="showPage('home')" class="flex items-center space-x-2.5">
+                <span class="w-1.5 h-4.5 bg-slate-900 dark:bg-white custom-rounded"></span>
+                <span class="font-bold tracking-tight text-lg text-slate-900 dark:text-white font-mono">JOURNAL.</span>
+            </a>
+
+            <!-- 导航菜单 -->
+            <nav class="hidden md:flex items-center space-x-8 text-xs tracking-wider uppercase font-medium text-slate-500 dark:text-slate-400">
+                <a href="#" onclick="showPage('home')" class="text-slate-900 dark:text-white border-b-2 border-slate-900 dark:border-white py-1">首页</a>
+                <a href="#" class="hover:text-slate-900 dark:hover:text-white transition-colors py-1">归档</a>
+                <a href="#" class="hover:text-slate-900 dark:hover:text-white transition-colors py-1">关于</a>
+                <a href="#" class="hover:text-slate-900 dark:hover:text-white transition-colors py-1">友链</a>
+            </nav>
+
+            <!-- 操作区 -->
+            <div class="flex items-center space-x-4">
+                <!-- 深浅色切换 -->
+                <button id="themeToggleBtn" class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white p-1 transition-colors" title="切换主题">
+                    <i class="fa-regular fa-moon text-base dark:hidden"></i>
+                    <i class="fa-regular fa-sun text-base hidden dark:block"></i>
+                </button>
+                <!-- 移动端菜单按钮 -->
+                <button id="mobileMenuToggleBtn" class="md:hidden text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
+                    <i class="fa-solid fa-bars-staggered text-base"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 移动端菜单下拉窗 -->
+        <div id="mobileMenu" class="hidden md:hidden bg-[#fcfbf9] dark:bg-[#0f1115] border-b border-slate-200/60 dark:border-slate-800/60 px-6 py-4 space-y-3.5 text-xs tracking-wider font-medium">
+            <a href="#" onclick="showPage('home'); toggleMobileMenu()" class="block text-slate-900 dark:text-white">首页</a>
+            <a href="#" class="block text-slate-500 dark:text-slate-400 hover:text-slate-900">归档</a>
+            <a href="#" class="block text-slate-500 dark:text-slate-400 hover:text-slate-900">关于</a>
+            <a href="#" class="block text-slate-500 dark:text-slate-400 hover:text-slate-900">友链</a>
+        </div>
+    </header>
+
+    <!-- 核心主体内容 -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-6 py-8">
+
+        <!-- ======================= 首页 (双栏) ======================= -->
+        <div id="homeView" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- 左栏: 文章列表 (8/12) -->
+            <section class="lg:col-span-8 space-y-6">
+                
+                <!-- 文章卡片 1 -->
+                <article class="bg-white dark:bg-[#15171e] p-5 custom-rounded border border-slate-200/50 dark:border-slate-800/50 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all">
+                    <div class="flex flex-col md:flex-row gap-5">
+                        <!-- 特色图片 (约束宽高比与轻圆角) -->
+                        <div class="md:w-1/3 aspect-[4/3] bg-slate-100 dark:bg-slate-800 custom-rounded overflow-hidden flex-shrink-0 cursor-pointer" onclick="showPage('detail')">
+                            <img src="https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80" alt="特色图 1" class="w-full h-full object-cover transition-transform duration-300 hover:scale-102" onerror="this.src='https://placehold.co/600x450/1e293b/ffffff?text=No+Cover'">
+                        </div>
+                        <!-- 文字属性 -->
+                        <div class="flex flex-col justify-between flex-grow">
+                            <div>
+                                <!-- 分类与时间 -->
+                                <div class="flex items-center space-x-2.5 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 tracking-wider mb-2">
+                                    <span class="uppercase">UIUX 设计</span>
+                                    <span class="text-slate-300 dark:text-slate-700">•</span>
+                                    <time class="text-slate-400 dark:text-slate-500 font-normal">2026-05-18</time>
+                                </div>
+                                <!-- 标题 -->
+                                <h2 class="text-lg font-bold text-slate-900 dark:text-white leading-snug tracking-tight mb-2 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                                    <a href="#" onclick="showPage('detail')">构建轻量级现代化设计系统：从零到一的思考</a>
+                                </h2>
+                                <!-- 描述 -->
+                                <p class="text-xs text-slate-600 dark:text-slate-400 line-clamp-3 leading-relaxed mb-4">
+                                    在快速迭代的团队开发中，一个无大圆角、无冗余组件、注重比例和文本层级的极简设计系统，能够帮助项目实现高效且统一的视觉输出。本文将探讨背后的排版规则与实现机制。
+                                </p>
+                            </div>
+                            <!-- 标签 -->
+                            <div class="flex flex-wrap gap-1.5">
+                                <span class="text-[10px] bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded hover:bg-slate-200 dark:hover:bg-slate-700/80 transition-colors">#设计规范</span>
+                                <span class="text-[10px] bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded hover:bg-slate-200 dark:hover:bg-slate-700/80 transition-colors">#UI</span>
+                                <span class="text-[10px] bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded hover:bg-slate-200 dark:hover:bg-slate-700/80 transition-colors">#前端工程</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- 文章卡片 2 -->
+                <article class="bg-white dark:bg-[#15171e] p-5 custom-rounded border border-slate-200/50 dark:border-slate-800/50 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all">
+                    <div class="flex flex-col md:flex-row gap-5">
+                        <div class="md:w-1/3 aspect-[4/3] bg-slate-100 dark:bg-slate-800 custom-rounded overflow-hidden flex-shrink-0 cursor-pointer" onclick="showPage('detail')">
+                            <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600&q=80" alt="特色图 2" class="w-full h-full object-cover transition-transform duration-300 hover:scale-102">
+                        </div>
+                        <div class="flex flex-col justify-between flex-grow">
+                            <div>
+                                <div class="flex items-center space-x-2.5 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 tracking-wider mb-2">
+                                    <span class="uppercase">前端开发</span>
+                                    <span class="text-slate-300 dark:text-slate-700">•</span>
+                                    <time class="text-slate-400 dark:text-slate-500 font-normal">2026-05-12</time>
+                                </div>
+                                <h2 class="text-lg font-bold text-slate-900 dark:text-white leading-snug tracking-tight mb-2 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                                    <a href="#" onclick="showPage('detail')">现代 CSS 的简约之美：重塑我们的样式编写习惯</a>
+                                </h2>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 line-clamp-3 leading-relaxed mb-4">
+                                    当 Tailwind CSS 与原生 CSS 变量相碰撞，如何既保持代码文件的轻巧，又保证在任何屏幕下都具备极其流畅的响应式布局？让我们来看看极简开发的全新实践。
+                                </p>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5">
+                                <span class="text-[10px] bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded hover:bg-slate-200 dark:hover:bg-slate-700/80 transition-colors">#CSS</span>
+                                <span class="text-[10px] bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded hover:bg-slate-200 dark:hover:bg-slate-700/80 transition-colors">#Tailwind</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- 文章卡片 3 -->
+                <article class="bg-white dark:bg-[#15171e] p-5 custom-rounded border border-slate-200/50 dark:border-slate-800/50 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all">
+                    <div class="flex flex-col md:flex-row gap-5">
+                        <div class="md:w-1/3 aspect-[4/3] bg-slate-100 dark:bg-slate-800 custom-rounded overflow-hidden flex-shrink-0 cursor-pointer" onclick="showPage('detail')">
+                            <img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=600&q=80" alt="特色图 3" class="w-full h-full object-cover transition-transform duration-300 hover:scale-102">
+                        </div>
+                        <div class="flex flex-col justify-between flex-grow">
+                            <div>
+                                <div class="flex items-center space-x-2.5 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 tracking-wider mb-2">
+                                    <span class="uppercase">效率与思辨</span>
+                                    <span class="text-slate-300 dark:text-slate-700">•</span>
+                                    <time class="text-slate-400 dark:text-slate-500 font-normal">2026-04-29</time>
+                                </div>
+                                <h2 class="text-lg font-bold text-slate-900 dark:text-white leading-snug tracking-tight mb-2 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                                    <a href="#" onclick="showPage('detail')">信息降噪时代：工作与生活的双重极简实验</a>
+                                </h2>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 line-clamp-3 leading-relaxed mb-4">
+                                    我们身处信息的洪流中，每天被各种推送干扰。如何利用技术手段和主动隔离思维，在混乱中重拾专注和创造力？这是一份面向数字时代工作者的极简生活实验清单。
+                                </p>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5">
+                                <span class="text-[10px] bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded hover:bg-slate-200 dark:hover:bg-slate-700/80 transition-colors">#极简主义</span>
+                                <span class="text-[10px] bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded hover:bg-slate-200 dark:hover:bg-slate-700/80 transition-colors">#思考</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- 简约分页 -->
+                <div class="flex items-center justify-between pt-6 border-t border-slate-200/60 dark:border-slate-800/60">
+                    <button class="px-3.5 py-1.5 text-xs font-medium text-slate-400 bg-white dark:bg-[#15171e] border border-slate-200 dark:border-slate-800 custom-rounded cursor-not-allowed" disabled>
+                        <i class="fa-solid fa-chevron-left mr-1"></i> 上一页
+                    </button>
+                    <span class="text-xs text-slate-400 dark:text-slate-500">1 / 5</span>
+                    <button class="px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-[#15171e] border border-slate-200 dark:border-slate-800 custom-rounded hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                        下一页 <i class="fa-solid fa-chevron-right ml-1"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- 右栏: 侧边栏 (4/12) -->
+            <aside class="lg:col-span-4 space-y-6">
+                <!-- 博主信息卡片 -->
+                <section class="bg-white dark:bg-[#15171e] p-5 custom-rounded border border-slate-200/50 dark:border-slate-800/50 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                    <div class="flex items-center space-x-3.5 mb-4">
+                        <!-- 博主头像 (46x46 简约圆角) -->
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="博主头像" class="w-11 h-11 custom-rounded object-cover border border-slate-200 dark:border-slate-800">
+                        <div>
+                            <h3 class="font-bold text-slate-900 dark:text-white text-sm">林微远 (Weiyuan)</h3>
+                            <p class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">Designer & Frontend Dev</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+                        专注于小体量产品开发与数字极简美学实践。在这里整理输出关于交互原则、前沿代码以及自省式笔记。
+                    </p>
+                    <div class="flex space-x-3.5 text-slate-400">
+                        <a href="#" class="hover:text-slate-900 dark:hover:text-white transition-colors"><i class="fa-brands fa-github text-sm"></i></a>
+                        <a href="#" class="hover:text-slate-900 dark:hover:text-white transition-colors"><i class="fa-brands fa-twitter text-sm"></i></a>
+                        <a href="#" class="hover:text-slate-900 dark:hover:text-white transition-colors"><i class="fa-regular fa-envelope text-sm"></i></a>
+                        <a href="#" class="hover:text-slate-900 dark:hover:text-white transition-colors"><i class="fa-solid fa-rss text-sm"></i></a>
+                    </div>
+                </section>
+
+                <!-- 文章分类 (显示6个 + 更多) -->
+                <section class="bg-white dark:bg-[#15171e] p-5 custom-rounded border border-slate-200/50 dark:border-slate-800/50 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                    <h4 class="font-bold text-slate-900 dark:text-white text-xs tracking-wider uppercase border-b border-slate-100 dark:border-slate-800/80 pb-3.5 mb-3.5">文章分类</h4>
+                    <ul id="categoryContainer" class="space-y-2.5 text-xs">
+                        <!-- 默认显示 6 个分类 -->
+                        <li>
+                            <a href="#" class="flex justify-between items-center text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                                <span>UIUX 设计</span>
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800/50 px-1.5 py-0.5 custom-rounded">12</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex justify-between items-center text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                                <span>前端开发</span>
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800/50 px-1.5 py-0.5 custom-rounded">24</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex justify-between items-center text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                                <span>极简生活</span>
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800/50 px-1.5 py-0.5 custom-rounded">8</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex justify-between items-center text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                                <span>随感随笔</span>
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800/50 px-1.5 py-0.5 custom-rounded">15</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex justify-between items-center text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                                <span>效率系统</span>
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800/50 px-1.5 py-0.5 custom-rounded">6</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex justify-between items-center text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                                <span>影像随心</span>
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800/50 px-1.5 py-0.5 custom-rounded">9</span>
+                            </a>
+                        </li>
+                        <!-- 隐藏的分类，点击更多显示 -->
+                        <li class="hidden extra-category">
+                            <a href="#" class="flex justify-between items-center text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                                <span>读书计划</span>
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800/50 px-1.5 py-0.5 custom-rounded">4</span>
+                            </a>
+                        </li>
+                        <li class="hidden extra-category">
+                            <a href="#" class="flex justify-between items-center text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                                <span>技术沙盒</span>
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800/50 px-1.5 py-0.5 custom-rounded">11</span>
+                            </a>
+                        </li>
+                    </ul>
+                    <button id="toggleCategoriesBtn" class="mt-3 text-[11px] text-indigo-600 dark:text-indigo-400 font-medium hover:underline focus:outline-none flex items-center space-x-1">
+                        <span>显示更多</span> <i class="fa-solid fa-chevron-down text-[9px] transform transition-transform duration-200" id="catChevron"></i>
+                    </button>
+                </section>
+
+                <!-- 文章标签 (显示20个 + 更多) -->
+                <section class="bg-white dark:bg-[#15171e] p-5 custom-rounded border border-slate-200/50 dark:border-slate-800/50 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                    <h4 class="font-bold text-slate-900 dark:text-white text-xs tracking-wider uppercase border-b border-slate-100 dark:border-slate-800/80 pb-3.5 mb-3.5">热门标签</h4>
+                    <div id="tagContainer" class="flex flex-wrap gap-1.5">
+                        <!-- 默认显示 20 个 -->
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">UIUX (10)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">Tailwind (6)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">React (12)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">CSS (8)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">排版哲学 (4)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">前端构建 (15)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">极简主义 (9)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">信息防噪 (5)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">Figma (7)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">JavaScript (11)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">摄影 (3)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">读书笔记 (14)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">NodeJS (5)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">Markdown (2)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">Git工作流 (6)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">Docker (4)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">效率工具 (8)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">时间管理 (7)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">TypeScript (9)</a>
+                        <a href="#" class="text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">自省式随想 (13)</a>
+
+                        <!-- 隐藏的额外标签 -->
+                        <a href="#" class="hidden extra-tag text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">Next.js (3)</a>
+                        <a href="#" class="hidden extra-tag text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">CSS Variables (5)</a>
+                        <a href="#" class="hidden extra-tag text-[10px] bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 px-2 py-0.5 custom-rounded transition-colors">视觉平衡 (4)</a>
+                    </div>
+                    <button id="toggleTagsBtn" class="mt-3 text-[11px] text-indigo-600 dark:text-indigo-400 font-medium hover:underline focus:outline-none flex items-center space-x-1">
+                        <span>显示更多</span> <i class="fa-solid fa-chevron-down text-[9px] transform transition-transform duration-200" id="tagChevron"></i>
+                    </button>
+                </section>
+            </aside>
+        </div>
+
+        <!-- ======================= 文章内页 (双栏) ======================= -->
+        <div id="detailView" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- 左栏: 文章正文与排版 (8/12) -->
+            <article class="lg:col-span-8 bg-white dark:bg-[#15171e] p-6 md:p-8 custom-rounded border border-slate-200/50 dark:border-slate-800/50 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                
+                <!-- 返回上一页 -->
+                <button onclick="showPage('home')" class="mb-6 text-xs text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center space-x-2 transition-colors focus:outline-none">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>返回首页</span>
+                </button>
+
+                <!-- 文章头部元数据 -->
+                <header class="mb-6 pb-6 border-b border-slate-100 dark:border-slate-800/80">
+                    <div class="flex items-center space-x-2.5 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-3">
+                        <span>UIUX 设计</span>
+                        <span>•</span>
+                        <span>字数 1.2k</span>
+                        <span>•</span>
+                        <span>阅读耗时 4分钟</span>
+                    </div>
+                    <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white leading-tight tracking-tight mb-4">
+                        构建轻量级现代化设计系统：从零到一的思考
+                    </h1>
+                    <div class="flex items-center space-x-3.5 text-xs text-slate-500 dark:text-slate-400">
+                        <div class="flex items-center space-x-2">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Weiyuan" class="w-5 h-5 custom-rounded object-cover">
+                            <span class="font-medium text-slate-700 dark:text-slate-300">林微远</span>
+                        </div>
+                        <span>发布于 2026-05-18</span>
+                        <span>•</span>
+                        <span>1.5k 阅读</span>
+                    </div>
+                </header>
+
+                <!-- 文章正文 -->
+                <div class="prose prose-slate dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 text-sm leading-relaxed space-y-5" id="articleContent">
+                    <p>
+                        在当前的数字产品研发环境中，“设计系统 (Design System)” 已经成为团队提效与保障视觉品质的核心工具。然而，许多团队在创建设计系统之初就陷入了一个误区：<strong>过度设计与冗余资产</strong>。
+                    </p>
+                    <p>
+                        他们花费数月时间设计了数百个高复杂度的变体和巨大的圆角卡片，最终由于使用成本高昂而遭到抛弃。在本文中，我们倡导一种克制的、摒弃繁琐组件及多余边角的设计方向，让页面回归内容的朴素与澄澈。
+                    </p>
+
+                    <h2 id="section-1" class="text-base font-bold text-slate-900 dark:text-white tracking-tight pt-3">一、为什么摒弃大圆角与超大字号</h2>
+                    <p>
+                        在极简主义（Minimalism）中，多余的修饰是需要首先被解构和审视的。过大的圆角和极大的字号容易让屏幕的信息负载能力大幅下降，且产生一种过度张扬、不够沉静的视觉喧闹感。
+                    </p>
+                    <p>
+                        精致的系统应当通过微妙的变化去传递优雅：
+                    </p>
+                    <ul class="list-disc list-inside space-y-2 pl-1">
+                        <li><strong>中立微圆角：</strong> 使用 4px（即本系统的 custom-rounded），让边际干脆利落地呈现。</li>
+                        <li><strong>阶梯型字号：</strong> 页面主要标题不应超过 24px，正文则在 14px 左右，以获取高密度、不突兀的视界效果。</li>
+                        <li><strong>阴影替代：</strong> 利用 1px 的微妙浅色边界（Border）替代深沉飘渺的物理阴影，将页面重新拉回到平面二维几何层级中。</li>
+                    </ul>
+
+                    <!-- 灯箱图片 -->
+                    <div class="my-6">
+                        <figure class="cursor-zoom-in" onclick="openLightbox(this)">
+                            <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80" alt="极简排版与视觉网格的平衡" class="w-full custom-rounded border border-slate-200 dark:border-slate-800 transition-opacity hover:opacity-95">
+                            <figcaption class="text-center text-[11px] text-slate-400 dark:text-slate-500 mt-2">图一：极简排版与视觉网格的秩序平衡</figcaption>
+                        </figure>
+                    </div>
+
+                    <h2 id="section-2" class="text-base font-bold text-slate-900 dark:text-white tracking-tight pt-3">二、基础变量与 CSS 布局架构</h2>
+                    <p>
+                        通过声明原生 CSS 变量，可以实现更轻量的深色模式变色。所有的系统层声明，均以简单的黑、白、灰色调进行过渡，在亮色和暗色之间达成无感且低能耗的自然更替。
+                    </p>
+
+                    <!-- 代码高亮容器与复制 -->
+                    <div class="code-wrapper my-4 bg-slate-900 dark:bg-[#090b0e] text-slate-200 custom-rounded border border-slate-800 overflow-hidden text-xs font-mono">
+                        <div class="flex justify-between items-center px-4 py-2 bg-slate-950/80 border-b border-slate-800 text-[10px] text-slate-400">
+                            <span>tokens.css</span>
+                            <button onclick="copyCode(this)" class="hover:text-white transition-colors flex items-center space-x-1 focus:outline-none">
+                                <i class="fa-regular fa-copy"></i> <span>复制</span>
+                            </button>
+                        </div>
+                        <pre class="p-4 overflow-x-auto"><code>:root {
+  --bg-primary: #fcfbf9;     /* 极致暖灰 */
+  --text-primary: #1e293b;   /* 幽深蓝黑 */
+  --border-subtle: #e2e8f0;  /* 骨质白灰 */
+  --radius-minimal: 4px;     /* 直线中性的4px弧度 */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0f1115;
+    --text-primary: #cbd5e1;
+    --border-subtle: #1e293b;
+  }
+}</code></pre>
+                    </div>
+
+                    <h2 id="section-3" class="text-base font-bold text-slate-900 dark:text-white tracking-tight pt-3">三、自适应 DOM 位置监听的实现</h2>
+                    <p>
+                        为了让右侧的文章大纲完美响应页面的滚动行为，我们引入了高效且无抖动的 IntersectionObserver 观察器。
+                    </p>
+
+                    <div class="code-wrapper my-4 bg-slate-900 dark:bg-[#090b0e] text-slate-200 custom-rounded border border-slate-800 overflow-hidden text-xs font-mono">
+                        <div class="flex justify-between items-center px-4 py-2 bg-slate-950/80 border-b border-slate-800 text-[10px] text-slate-400">
+                            <span>observer.js</span>
+                            <button onclick="copyCode(this)" class="hover:text-white transition-colors flex items-center space-x-1 focus:outline-none">
+                                <i class="fa-regular fa-copy"></i> <span>复制</span>
+                            </button>
+                        </div>
+                        <pre class="p-4 overflow-x-auto"><code>const observerOptions = {
+  root: null,
+  rootMargin: '-80px 0px -75% 0px',
+  threshold: 0
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      activateSidebarAnchor(entry.target.id);
+    }
+  });
+}, observerOptions);</code></pre>
+                    </div>
+
+                    <!-- 附图灯箱二 -->
+                    <div class="my-6">
+                        <figure class="cursor-zoom-in" onclick="openLightbox(this)">
+                            <img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=800&q=80" alt="极简后台组件的边界设计" class="w-full custom-rounded border border-slate-200 dark:border-slate-800 transition-opacity hover:opacity-95">
+                            <figcaption class="text-center text-[11px] text-slate-400 dark:text-slate-500 mt-2">图二：基于 4px 灰度网格的低对比度界面组件</figcaption>
+                        </figure>
+                    </div>
+
+                    <h2 id="section-4" class="text-base font-bold text-slate-900 dark:text-white tracking-tight pt-3">四、结语与思索</h2>
+                    <p>
+                        优秀的网页，不应该将大量高对比度、大体量的资产压制在用户眼中。把视线还给文本，通过紧密和微小却秩序井然的层级关系，在低功耗与高纯度的页面表现之间重寻内啡肽。
+                    </p>
+                </div>
+            </article>
+
+            <!-- 右栏: 目录大纲 (4/12) -->
+            <aside class="lg:col-span-4">
+                <div class="sticky top-24 bg-white dark:bg-[#15171e] p-5 custom-rounded border border-slate-200/50 dark:border-slate-800/50 shadow-[0_1px_3px_rgba(0,0,0,0.02)] space-y-6">
+                    <div>
+                        <h4 class="font-bold text-slate-900 dark:text-white text-xs tracking-wider uppercase border-b border-slate-100 dark:border-slate-800/80 pb-3.5 mb-3.5">文章大纲</h4>
+                        <!-- TOC 列表容器 -->
+                        <nav id="tocContainer" class="space-y-3 text-xs">
+                            <!-- 由原生 JS 动态读取 h2 填充 -->
+                        </nav>
+                    </div>
+
+                    <!-- 分享栏 -->
+                    <div class="pt-4 border-t border-slate-100 dark:border-slate-800/80">
+                        <span class="block text-[10px] text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-wider">分享</span>
+                        <div class="flex space-x-3.5 text-slate-400">
+                            <button class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors focus:outline-none" title="微博分享"><i class="fa-brands fa-weibo text-sm"></i></button>
+                            <button class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors focus:outline-none" title="微信分享"><i class="fa-brands fa-weixin text-sm"></i></button>
+                            <button class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors focus:outline-none" title="Twitter分享"><i class="fa-brands fa-twitter text-sm"></i></button>
+                            <button onclick="copyCurrentUrl()" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors focus:outline-none" title="复制链接"><i class="fa-solid fa-link text-sm"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- 底部页脚 -->
+    <footer class="bg-white dark:bg-[#15171e] border-t border-slate-200/60 dark:border-slate-800/60 py-8 transition-colors">
+        <div class="max-w-6xl mx-auto px-6 text-center space-y-2">
+            <p class="text-xs text-slate-400 dark:text-slate-500 font-mono">© 2026 JOURNAL. Minimalist Layout Built With Tailwind & JS.</p>
+            <p class="text-[10px] text-slate-300 dark:text-slate-600">无繁复大圆角 · 无干扰大字号 · 回归纯正读写</p>
+        </div>
+    </footer>
+
+    <!-- 全局灯箱大图 (Lightbox) 遮罩 -->
+    <div id="lightboxOverlay" class="fixed inset-0 bg-black/95 z-50 hidden flex flex-col justify-center items-center p-4 cursor-zoom-out" onclick="closeLightbox()">
+        <button class="absolute top-4 right-4 text-white/60 hover:text-white text-lg p-2 transition-colors focus:outline-none" onclick="closeLightbox()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <img id="lightboxImage" class="max-w-full max-h-[85vh] object-contain custom-rounded shadow-2xl" src="" alt="大图模式">
+        <p id="lightboxCaption" class="text-slate-400 text-xs mt-4 tracking-wide max-w-xl text-center"></p>
+    </div>
+
+    <!-- 自定义轻量吐司通知 -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-[11px] font-medium px-4 py-2.5 custom-rounded shadow-md opacity-0 pointer-events-none transform translate-y-2 transition-all duration-300 z-50 flex items-center space-x-2">
+        <i class="fa-solid fa-circle-check text-emerald-500"></i>
+        <span id="toastMsg">复制成功！</span>
+    </div>
+
+    <!-- 交互脚本 -->
+    <script>
+        // DOM 初始化与路由控制
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const mobileMenuToggleBtn = document.getElementById('mobileMenuToggleBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        // 主题检测与更替
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        initTheme();
+
+        // 移动端菜单切换
+        mobileMenuToggleBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        function toggleMobileMenu() {
+            mobileMenu.classList.add('hidden');
+        }
+
+        // 视图切换 (极简路由实现)
+        function showPage(pageId) {
+            const homeView = document.getElementById('homeView');
+            const detailView = document.getElementById('detailView');
+
+            if (pageId === 'home') {
+                homeView.classList.remove('hidden');
+                detailView.classList.add('hidden');
+                document.getElementById('readingProgress').style.transform = 'scale-x(0)';
+                window.scrollTo({ top: 0, behavior: 'instant' });
+            } else if (pageId === 'detail') {
+                homeView.classList.add('hidden');
+                detailView.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                buildTOC();
+                updateProgressBar();
+            }
+        }
+
+        // 首页分类列表展开/折叠
+        const toggleCategoriesBtn = document.getElementById('toggleCategoriesBtn');
+        const catChevron = document.getElementById('catChevron');
+        const extraCategories = document.querySelectorAll('.extra-category');
+
+        toggleCategoriesBtn.addEventListener('click', () => {
+            const areHidden = extraCategories[0].classList.contains('hidden');
+            extraCategories.forEach(el => {
+                if (areHidden) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+            catChevron.style.transform = areHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+            toggleCategoriesBtn.querySelector('span').innerText = areHidden ? '收起分类' : '显示更多';
+        });
+
+        // 首页标签列表展开/折叠
+        const toggleTagsBtn = document.getElementById('toggleTagsBtn');
+        const tagChevron = document.getElementById('tagChevron');
+        const extraTags = document.querySelectorAll('.extra-tag');
+
+        toggleTagsBtn.addEventListener('click', () => {
+            const areHidden = extraTags[0].classList.contains('hidden');
+            extraTags.forEach(el => {
+                if (areHidden) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+            tagChevron.style.transform = areHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+            toggleTagsBtn.querySelector('span').innerText = areHidden ? '收起标签' : '显示更多';
+        });
+
+        // 代码框一键复制逻辑
+        function copyCode(btn) {
+            const codeEl = btn.closest('.code-wrapper').querySelector('code');
+            const codeText = codeEl.innerText;
+
+            // 备用兼容剪贴板复制，规避 iframe 安全性阻断
+            const tempArea = document.createElement('textarea');
+            tempArea.value = codeText;
+            document.body.appendChild(tempArea);
+            tempArea.select();
+            try {
+                document.execCommand('copy');
+                showToast("代码片段已复制");
+                
+                // 改变按钮提示
+                const rawHTML = btn.innerHTML;
+                btn.innerHTML = `<i class="fa-solid fa-check text-emerald-500"></i> <span class="text-emerald-500 font-sans">已复制</span>`;
+                setTimeout(() => {
+                    btn.innerHTML = rawHTML;
+                }, 2000);
+            } catch (err) {
+                showToast("复制失败，请手动选择复制");
+            }
+            document.body.removeChild(tempArea);
+        }
+
+        // 复制当前页面链接
+        function copyCurrentUrl() {
+            const tempArea = document.createElement('textarea');
+            tempArea.value = window.location.href;
+            document.body.appendChild(tempArea);
+            tempArea.select();
+            try {
+                document.execCommand('copy');
+                showToast("文章链接已复制至剪贴板");
+            } catch (err) {
+                showToast("复制链接失败");
+            }
+            document.body.removeChild(tempArea);
+        }
+
+        // 吐司提示组件
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.innerText = message;
+            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-2');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2');
+            }, 2500);
+        }
+
+        // 图片灯箱功能
+        const lightboxOverlay = document.getElementById('lightboxOverlay');
+        const lightboxImage = document.getElementById('lightboxImage');
+        const lightboxCaption = document.getElementById('lightboxCaption');
+
+        function openLightbox(figure) {
+            const img = figure.querySelector('img');
+            const caption = figure.querySelector('figcaption');
+            if (img) {
+                lightboxImage.src = img.src;
+                lightboxCaption.innerText = caption ? caption.innerText : '';
+                lightboxOverlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // 锁定屏幕滚动
+            }
+        }
+
+        function closeLightbox() {
+            lightboxOverlay.classList.add('hidden');
+            document.body.style.overflow = ''; // 恢复滚动
+        }
+
+        // 动态读取 H2 组装大纲 TOC 列表
+        let observer;
+        function buildTOC() {
+            const articleContent = document.getElementById('articleContent');
+            const tocContainer = document.getElementById('tocContainer');
+            if (!articleContent || !tocContainer) return;
+
+            const headings = articleContent.querySelectorAll('h2');
+            tocContainer.innerHTML = '';
+
+            if (headings.length === 0) {
+                tocContainer.innerHTML = `<span class="text-slate-400">无目录节点</span>`;
+                return;
+            }
+
+            headings.forEach((heading, idx) => {
+                const linkId = heading.getAttribute('id') || `h2-node-${idx}`;
+                heading.setAttribute('id', linkId);
+
+                const link = document.createElement('a');
+                link.setAttribute('href', `#${linkId}`);
+                link.className = 'toc-anchor block py-1.5 px-2.5 border-l-2 border-transparent text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all pl-3 truncate';
+                link.dataset.anchor = linkId;
+                link.innerText = heading.innerText;
+
+                // 锚点平滑滚动
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetEl = document.getElementById(linkId);
+                    if (targetEl) {
+                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        // 修正 offset 偏离 (针对 sticky 头部)
+                        setTimeout(() => {
+                            window.scrollBy(0, -80);
+                        }, 300);
+                    }
+                });
+
+                tocContainer.appendChild(link);
+            });
+
+            // 监听滚动，点亮大纲对应节点
+            if (observer) observer.disconnect();
+
+            const anchors = document.querySelectorAll('.toc-anchor');
+            observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const targetId = entry.target.id;
+                        anchors.forEach(a => {
+                            if (a.dataset.anchor === targetId) {
+                                a.classList.remove('border-transparent', 'text-slate-400');
+                                a.classList.add('border-indigo-600', 'dark:border-indigo-400', 'text-indigo-600', 'dark:text-indigo-400', 'font-semibold', 'bg-slate-50', 'dark:bg-slate-800/20');
+                            } else {
+                                a.classList.add('border-transparent', 'text-slate-400');
+                                a.classList.remove('border-indigo-600', 'dark:border-indigo-400', 'text-indigo-600', 'dark:text-indigo-400', 'font-semibold', 'bg-slate-50', 'dark:bg-slate-800/20');
+                            }
+                        });
+                    }
+                });
+            }, {
+                root: null,
+                rootMargin: '-80px 0px -70% 0px',
+                threshold: 0
+            });
+
+            headings.forEach(heading => observer.observe(heading));
+        }
+
+        // 顶部进度条更新
+        function updateProgressBar() {
+            const detailView = document.getElementById('detailView');
+            if (detailView.classList.contains('hidden')) {
+                document.getElementById('readingProgress').style.transform = 'scale-x(0)';
+                return;
+            }
+            const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = height > 0 ? (winScroll / height) : 0;
+            document.getElementById('readingProgress').style.transform = `scale-x(${scrolled})`;
+        }
+
+        window.addEventListener('scroll', updateProgressBar);
+    </script>
+</body>
+</html>
